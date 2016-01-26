@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Index{% endblock %}
+{%block head %}
+    {{ super() }}
+{% endblock %}
+{% block body %}
+<div class="container">
+      <div class="header clearfix">
+        <nav>
+          <ul class="nav nav-pills pull-right">
+            <li role="presentation" class="active"><a href="#">Home</a></li>
+            <li role="presentation"><a href="#">About</a></li>
+            <li role="presentation"><a href="#">Contact</a></li>
+          </ul>
+        </nav>
+        <h3 class="text-muted">Udacity Catalog Project</h3>
+      </div>
+
+      <div class="jumbotron">
+        <h1>Gros Morne National Park Expedition</h1>
+        <p class="lead">We are going on an expedition to Gros Morne National Park. From Spring 2016 - Winter 2017 we are going to explore the park on the west coast of Newfoundland. Hiking, boating, climbing and skiing for almost a year.</p>
+        <p><a class="btn btn-lg btn-success" href="{{ url_for('login') }}" role="button">Sign in</a></p>
+      </div>
+
+      <div class="row marketing">
+        <div class="col-lg-6">
+          <h4>Apparel</h4>
+          <p>Look what has already been added, add new clothing or edit or remove cloth you have already added.</p>
+
+          <h4>Hardware</h4>
+          <p>Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras mattis consectetur purus sit amet fermentum.</p>
+
+          <h4>Cooking</h4>
+          <p>Food is essential for every expedition, the cook is the second most important man on every expedition. Look what's already listed.</p>
+        </div>
+
+        <div class="col-lg-6">
+          <h4>Snowsport</h4>
+          <p>Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum.</p>
+
+          <h4>Climbing</h4>
+          <p>Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras mattis consectetur purus sit amet fermentum.</p>
+
+          <h4>Watersports</h4>
+          <p>Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <p>&copy; 2016 Company, Inc.</p>
+      </footer>
+
+    </div> <!-- /container -->
+{% endblock %}

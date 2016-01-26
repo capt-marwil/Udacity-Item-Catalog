@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Index{% endblock %}
+{%block head %}
+    {{ super() }}
+{% endblock %}
+{% block body %}
+
+
+      <div class="jumbotron">
+           <p><img src="{{url_for('static', filename=expedition.picture) }}" class="img-responsive"></p>
+        <h1>{{ expedition.title }}</h1>
+        <p class="lead">{{ expedition.description }}</p>
+        <p><a class="btn btn-lg btn-success" href="{{ url_for('login') }}" role="button">Sign in</a></p>
+      </div>
+      <div class="row marketing">
+
+          {% if not categories %}
+
+          <p>So far no categories for activities <a href="{{ url_for('login') }}">Login</a> to create a new category and start adding stuff!</p>
+           {% else %}
+          <div class="col-lg-12">
+              {% for c in categories %}
+
+          <h4><a href="{{ url_for('category', expedition_id=expedition.id, category_id=c.id) }}">{{ c.name }}</a></h4>
+          <p>{{ c.description|truncate(110, True) }}</p>
+          {% endfor %}
+              {% endif %}
+      </div>
+
+      <footer class="footer">
+        <p>&copy; 2016 Company, Inc.</p>
+      </footer>
+
+    </div> <!-- /container -->
+{% endblock %}
