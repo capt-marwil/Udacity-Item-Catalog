@@ -222,14 +222,15 @@ def addExpedition():
     if 'username' not in login_session:
         return redirect('/login')
     if request.method == 'POST':
+        user = session.query(User).filter_by(name=login_session['username']).one()
         newExpedition = Expedition(title=request.form['title'],
                                    description=request.form['description'],
                                    picture=request.form['picture'],
-                                   user_id=user_id)
-        session.add(Expedition)
+                                   user_id=user.id)
+        session.add(newExpedition)
         flash('New Expedition %s has been created' % newExpedition.title)
         session.commit()
-        return redirect(url_for('index'))
+        return redirect(url_for('expedition', expedition_id=newExpedition.id))
     else:
         return render_template('addExpedition.html')
 
