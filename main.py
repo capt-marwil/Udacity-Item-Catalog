@@ -14,6 +14,7 @@ import json
 import requests
 import random
 import string
+from xml.etree.ElementTree import dump, Element, SubElement
 
 
 app = Flask(__name__)
@@ -316,6 +317,20 @@ def CreateUser(login_session):
     session.commit()
     user = session.query(User).filter_by(email = login_session['email']).one()
     return user.id
+
+""" routes to return data via json or xml apis """
+
+@app.route('/expedition/<int:expedition_id>/xml')
+def getExpeditionXML(expedition_id):
+    expedition = session.query(Expedition).filter_by(id=expedition_id).one()
+    root = Element('expedition', id=expedition.id)
+    title = SubElement(root, 'title')
+    description = SubElement(root, 'description')
+    title.text = expedition.title
+    description.text = expedition.description
+    response = make_response('REST API')
+    response.headers['Content-Type'] = 'application/xml'
+    dump(expedition)
 
 
 if __name__ == '__main__':
