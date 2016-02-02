@@ -236,13 +236,31 @@ def addExpedition():
 
 @app.route('/expedition/<int:expedition_id>/edit', methods=['GET', 'POST'])
 def editExpedition(expedition_id):
+    editedExpediton = session.query(Expedition).filter_by(id=expedition_id).one()
+    user_id = getUserID(login_session['email'])
     if 'username' not in login_session:
         return redirect('/login')
+    if editedExpediton.user_id != user_id:
+        return "<script>function myFunction() { alert('You are not allowed to edit this expedition. Please create your own expedition to edit');</script><body>onload='myFunction()''>"
+    if request.method == 'POST':
+        if request.form['title']:
+            editedExpediton.title = request.form['title']
+        if request.form['description']:
+            editedExpediton.description = request.form['description']
+        if request.form['picture']:
+            editedExpediton.picture = request.form['picture']
+        session.add(editedExpediton)
+        session.commit()
+        flash('You have successsfully edited your expedition.')
+        return redirect(url_for('expedition', expedition_id=expedition_id))
+    else:
+        return render_template('editExpedition.html', expedition=editedExpediton)
+
 
 
 @app.route('/expedition/<int:expedition_id>/'
            'delete', methods=['GET', 'POST'])
-def deleteRoute(expedition_id):
+def deleteExpedition(expedition_id):
    if 'username' not in login_session:
         return redirect('/login')
 

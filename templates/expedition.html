@@ -24,7 +24,10 @@
           <p>So far no categories for activities <a href="{{ url_for('login') }}">Login</a> to create a new category and start adding stuff!</p>
                 {% endif %}
       </div>
-
+        <div class="row">
+            <p class="col-lg-6"><a href="{{ url_for('editExpedition', expedition_id=expedition.id) }}">Edit</a> </p>
+            <p class="col-lg-6"><a href="{{ url_for('deleteExpedition', expedition_id=expedition.id) }}">Delete</a> </p>
+        </div>
       <footer class="footer">
         <p>&copy; 2016 Company, Inc.</p>
       </footer>
