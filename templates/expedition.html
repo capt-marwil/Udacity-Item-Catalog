@@ -4,17 +4,7 @@
     {{ super() }}
 {% endblock %}
 {% block body %}
- <div class="row marketing flash">
-          {% with messages = get_flashed_messages() %}
-            {% if messages %}
-          <ul>
-              {% for message in messages %}
-                <li><strong>{{ message }}</strong></li>
-              {% endfor %}
-          </ul>
-            {% endif %}
-          {% endwith %}
-      </div>
+
       <div class="jumbotron">
            <p><img src="{{ expedition.picture }}" class="img-responsive"></p>
         <h1>{{ expedition.title }}</h1>

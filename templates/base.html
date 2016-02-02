@@ -40,6 +40,17 @@
         </nav>
         <h3 class="text-muted">Udacity Catalog Project</h3>
       </div>
+       <div class="row marketing flash">
+          {% with messages = get_flashed_messages() %}
+            {% if messages %}
+          <ul>
+              {% for message in messages %}
+                <li><strong>{{ message }}</strong></li>
+              {% endfor %}
+          </ul>
+            {% endif %}
+          {% endwith %}
+      </div>
     {% block body %}
     {% endblock %}
         <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
