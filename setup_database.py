@@ -2,7 +2,7 @@ from sqlalchemy import Table, Column, ForeignKey, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
-
+from xml.etree.ElementTree import Element, SubElement
 
 Base = declarative_base()
 
@@ -42,9 +42,17 @@ class Expedition(Base):
             'id': self.id,
             'title': self.title,
             'description': self.description,
-            'category': self.category
         }
-
+"""
+    @property
+    def serialize_xml(self):
+        root = Element('expedition', id=self.id)
+        title = SubElement(root, 'title')
+        description = SubElement(root, 'description')
+        title.text = self.title
+        description.text = self.description
+        return root
+"""
 
 class Category(Base):
     __tablename__ = 'categories'
