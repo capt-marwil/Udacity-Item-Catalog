@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Edit {{ expedition.title }}{% endblock %}
+{%block head %}
+    {{ super() }}
+{% endblock %}
+{% block body %}
+<!--
+<div class="jumbotron">
+    <p></p>
+        <h1></h1>
+        <p class="lead"></p>
+        <p></p>
+</div>
+-->
+      <div class="row marketing">
+          <div class="coll-lg-12">
+        <form action="{{ url_for('editExpedition', expedition_id=expedition.id ) }}" method="post" enctype="multipart/form-data">
+            <p><label for="title">Please enter a new name for for your expedition:</label></p>
+            <p>
+                <input name="title" placeholder="{{ expedition.title }}">
+            </p>
+            <p><label for="description">Please describe what your are planning to to and what to expect.</label></p>
+            <p><textarea name="description" placeholder="{{ expedition.description }}"></textarea></p>
+            <p><label for="picture"></label></p>
+            <p><input type="text" name="picture" placeholder="{{ expedition.picture }}"></p>
+            <p><input type="submit" class="" value="Save"><a href="{{ url_for('index')}}">Cancel</a></p>
+        </form>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <p>&copy; 2016 Company, Inc.</p>
+      </footer>
+
+    </div> <!-- /container -->
+{% endblock %}
