@@ -39,25 +39,24 @@ session = DBSession()
 @app.route('/')
 @app.route('/catalog')
 def index():
-    logged_in = True
-    if 'username' not in login_session:
-        logged_in = False
     expeditions = session.query(Expedition).order_by(Expedition.title)
-    if expeditions is None:
-        return render_template('index.html', logged_id=logged_in)
-    for e in expeditions:
-        print e.id
-    return render_template('index.html', expeditions=expeditions,
-                           logged_in=logged_in)
+    if 'username' not in login_session:
+        return render_template('public_index.html', expeditions=expeditions)
+    else:
+        return render_template('index.html', expeditions=expeditions)
 
 
-@app.route('/expedition/<int:expedition_id>/')
+@app.route('/expedition/<int:expedition_id>')
 def expedition(expedition_id):
     expedition = session.query(Expedition).filter_by(id=expedition_id).one()
-    #categories = None
-    categories = session.query(Category).filter(Category.expedition.any(id=expedition_id))
-    return render_template('expedition.html', expedition=expedition,
-                           categories=categories)
+    categories = session.query(Category).filter(Category.expedition.any(
+        id=expedition_id))
+    if 'username' not in login_session:
+        return render_template('public_expedition.html', expedition=expedition,
+                               categories=categories)
+    else:
+        return render_template('expedition.html', expedition=expedition,
+                               categories=categories)
 
 
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>')
@@ -222,11 +221,11 @@ def addExpedition():
     if 'username' not in login_session:
         return redirect('/login')
     if request.method == 'POST':
-        user = session.query(User).filter_by(name=login_session['username']).one()
+        user_id = getUserID(login_session['email'])
         newExpedition = Expedition(title=request.form['title'],
                                    description=request.form['description'],
                                    picture=request.form['picture'],
-                                   user_id=user.id)
+                                   user_id=user_id)
         session.add(newExpedition)
         flash('New Expedition %s has been created' % newExpedition.title)
         session.commit()

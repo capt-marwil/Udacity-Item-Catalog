@@ -4,35 +4,28 @@
     {{ super() }}
 {% endblock %}
 {% block body %}
- <div class="row marketing flash">
-          {% with messages = get_flashed_messages() %}
-            {% if messages %}
-          <ul>
-              {% for message in messages %}
-                <li><strong>{{ message }}</strong></li>
-              {% endfor %}
-          </ul>
-            {% endif %}
-          {% endwith %}
-      </div>
       <div class="jumbotron">
            <p><img src="{{ expedition.picture }}" class="img-responsive"></p>
         <h1>{{ expedition.title }}</h1>
         <p class="lead">{{ expedition.description }}</p>
+          <p>
+            <a class="btn btn-lg btn-success" href="{{ url_for('login') }}" role="button">Sign in</a>
+        </p>
       </div>
       <div class="row marketing">
 
-          {% if categories != [] %}
-            <div class="col-lg-12">
+          {% if not categories %}
+
+          <p>So far no categories for activities <a href="{{ url_for('login') }}">Login</a> to create a new category and start adding stuff!</p>
+           {% else %}
+          <div class="col-lg-12">
               <h1>irgendetwas war in categories</h1>
-                {% for c in categories %}
+              {% for c in categories %}
 
           <h4><a href="{{ url_for('category', expedition_id=expedition.id, category_id=c.id) }}">{{ c.name }}</a></h4>
           <p>{{ c.description|truncate(110, True) }}</p>
-                {% endfor %}
-            {% else %}
-          <p>So far no categories for activities <a href="{{ url_for('login') }}">Login</a> to create a new category and start adding stuff!</p>
-                {% endif %}
+          {% endfor %}
+              {% endif %}
       </div>
 
       <footer class="footer">
