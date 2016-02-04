@@ -25,8 +25,9 @@
                 {% endif %}
       </div>
         <div class="row">
-            <p class="col-lg-6"><a href="{{ url_for('editExpedition', expedition_id=expedition.id) }}">Edit</a> </p>
-            <p class="col-lg-6"><a href="{{ url_for('deleteExpedition', expedition_id=expedition.id) }}">Delete</a> </p>
+            <p class="col-lg-2"><a href="{{ url_for('editExpedition', expedition_id=expedition.id) }}">Edit Expedition</a> </p>
+            <p class="col-lg-2"><a href="{{ url_for('deleteExpedition', expedition_id=expedition.id) }}">Delete Expedition</a> </p>
+            <p class="col-lg-8"></p>
         </div>
       <footer class="footer">
         <p>&copy; 2016 Company, Inc.</p>

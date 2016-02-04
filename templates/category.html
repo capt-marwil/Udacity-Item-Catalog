@@ -26,7 +26,11 @@
           {% endfor %}
               {% endif %}
       </div>
-
+        <div class="row">
+            <p class="col-lg-2"><a href="{{ url_for('editCategory', expedition_id=expedition.id, category_id=category_id) }}">Edit Category</a> </p>
+            <p class="col-lg-2"><a href="{{ url_for('deleteCategory', expedition_id=expedition.id, category_id=category_id) }}">Delete Category</a> </p>
+            <p class="col-lg-8"></p>
+        </div>
       <footer class="footer">
         <p>&copy; 2016 Company, Inc.</p>
       </footer>

@@ -34,7 +34,12 @@
         <nav>
           <ul class="nav nav-pills pull-right">
             <li role="presentation" class="active"><a href="{{ url_for('index')}}">Home</a></li>
-            <li role="presentation"><a href="#">About</a></li>
+            <li role="presentation">
+                {% if 'username' not in session %}
+                            <a href="{{ url_for('login') }}">Login</a></li>
+                {% else %}
+                            <a href="{{ url_for('disconnet') }}">Logout</a>
+                {% endif %}
             <li role="presentation"><a href="#">Contact</a></li>
           </ul>
         </nav>
