@@ -23,6 +23,8 @@ CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
 APPLICATION_NAME = "Expedition Packing list App"
 
+
+
 """ Connect to Database and create a database session """
 engine = create_engine('sqlite:///catalog.db')
 Base.metadata.bind = engine
@@ -41,9 +43,11 @@ session = DBSession()
 def index():
     expeditions = session.query(Expedition).order_by(Expedition.title)
     if 'username' not in login_session:
-        return render_template('public_index.html', expeditions=expeditions)
+        return render_template('public_index.html',
+                               expeditions=expeditions)
     else:
-        return render_template('index.html', expeditions=expeditions)
+        return render_template('index.html',
+                               expeditions=expeditions)
 
 
 @app.route('/expedition/<int:expedition_id>')
@@ -52,10 +56,12 @@ def expedition(expedition_id):
     categories = session.query(Category).filter(Category.expedition.any(
         id=expedition_id))
     if 'username' not in login_session:
-        return render_template('public_expedition.html', expedition=expedition,
+        return render_template('public_expedition.html',
+                               expedition=expedition,
                                categories=categories)
     else:
-        return render_template('expedition.html', expedition=expedition,
+        return render_template('expedition.html',
+                               expedition=expedition,
                                categories=categories)
 
 
@@ -63,8 +69,11 @@ def expedition(expedition_id):
 def category(expedition_id, category_id):
     expedition = session.query(Expedition).filter_by(id=expedition_id).one()
     category = session.query(Category).filter_by(id=category_id).one()
-    items = session.query(Item).filter_by(category_id=category_id, expedition_id=expedition_id).all()
-    return render_template('category.html', category=category, expedition=expedition, items=items)
+    items = session.query(Item).filter_by(category_id=category_id,
+                                          expedition_id=expedition_id).all()
+    return render_template('category.html', category=category,
+                                            expedition=expedition,
+                                            items=items)
 
 
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/'
@@ -315,19 +324,29 @@ def addExpedition():
         session.add(newExpedition)
         flash('New Expedition %s has been created' % newExpedition.title)
         session.commit()
-        return redirect(url_for('expedition', expedition_id=newExpedition.id))
+        return redirect(url_for('expedition',
+                                expedition_id=newExpedition.id))
     else:
         return render_template('addExpedition.html')
 
 
 @app.route('/expedition/<int:expedition_id>/edit', methods=['GET', 'POST'])
 def editExpedition(expedition_id):
+    """
+    Checks whether user is logged in
+    If called with GET displays form to edit an expedition record
+    If called with POST checks whether user is logged in and allowed to edit
+     the record.
+    If so stores edited data and redirects user to expedition overview
+    :param expedition_id:
+    :return: editExpedition.html or expedition.html
+    """
     editedExpediton = session.query(Expedition).filter_by(id=expedition_id).one()
     user_id = getUserID(login_session['email'])
     if 'username' not in login_session:
         return redirect('/login')
     if editedExpediton.user_id != user_id:
-        return "<script>function myFunction() { alert('You are not allowed to edit this expedition. Please create your own expedition to edit');</script><body>onload='myFunction()''>"
+        return "<script>function myFunction() { alert('You are not allowed to edit this expedition. Please create your own expedition to edit');</script><body onload='myFunction();'>"
     if request.method == 'POST':
         if request.form['title']:
             editedExpediton.title = request.form['title']
@@ -338,20 +357,45 @@ def editExpedition(expedition_id):
         session.add(editedExpediton)
         session.commit()
         flash('You have successsfully edited your expedition.')
-        return redirect(url_for('expedition', expedition_id=expedition_id))
+        return redirect(url_for('expedition',
+                                expedition_id=expedition_id))
     else:
-        return render_template('editExpedition.html', expedition=editedExpediton)
+        return render_template('editExpedition.html',
+                               expedition=editedExpediton)
 
 
 
 @app.route('/expedition/<int:expedition_id>/'
            'delete', methods=['GET', 'POST'])
 def deleteExpedition(expedition_id):
-   if 'username' not in login_session:
+    """
+    Checks whether user is logged in
+    If called with GET displays form to delete an expedition record
+    If called with POST deletes the record.
+    :param expedition_id:
+    :return: deleteExpedition.html or expedition.html
+    """
+    deleteExpedition = session.query(Expedition).filter_by(id=expedition_id).one()
+    user_id = getUserID(login_session['email'])
+    if 'username' not in login_session:
         return redirect('/login')
+    if deleteExpedition.user_id != user_id:
+        return "You are not allowed to delete this expedition. Users can only delete Expeditions they created"
+    if request.method == 'POST':
+        session.delete(deleteExpedition)
+        session.commit()
+        flash('%s successfully deleted' % deleteExpedition.title)
+        return redirect(url_for('index'))
+    else:
+        return render_template('deleteExpedition.html',
+                               expedition=deleteExpedition)
 
 
-""" routes to manipulate Category entity """
+
+
+
+
+""" routes to manipulate Category entities """
 
 
 @app.route('/expedition/<int:expedition_id>/category/'
