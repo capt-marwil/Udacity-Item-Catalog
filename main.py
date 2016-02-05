@@ -446,8 +446,8 @@ def editCategory(expedition_id, category_id):
             editCategory.description = request.form['description']
         if request.form['picture']:
             editCategory.picture = request.form['picture']
-        #session.add(editCategory)
-        #session.commit()
+        session.add(editCategory)
+        session.commit()
         flash('You have successsfully edited your Category.')
         return redirect(url_for('category',
                                 expedition_id=expedition_id,
