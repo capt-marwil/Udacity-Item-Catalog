@@ -468,8 +468,22 @@ def editCategory(expedition_id, category_id):
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/'
            'delete', methods=['GET', 'POST'])
 def deleteCategory(expedition_id, category_id):
+    deleteCategory = session.query(Category).filter_by(id=category_id).filter(Category.expedition.any(id=expedition_id)).first()
+    user_id = getUserID(login_session['email'])
     if 'username' not in login_session:
         return redirect('/login')
+    if deleteCategory.user_id != user_id:
+        return "You are not allowed to deleted this category. Users are only allowed to delete categories they created."
+    if request.method == 'POST':
+        session.delete(deleteCategory)
+        session.commit()
+        flash("You have succesfully deleted %s " % deleteCategory.name)
+        return redirect(url_for('expedition',
+                                expedition_id=expedition_id))
+    else:
+        render_template('deleteCategory.html',
+                        expedition_id=expedition_id,
+                        category_id=category_id)
 
 
 """ routes to manipulate Item entity """
@@ -504,15 +518,50 @@ def addItem(expedition_id, category_id):
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/item/'
            '<int:item_id>/edit', methods=['GET', 'POST'])
 def editItem(expedition_id, category_id, item_id):
+    editItem = session.query(Item).filter_by(id=item_id, category_id=category_id, expedition_id=expedition_id)
+    user_id = getUserID(login_session['email'])
     if 'username' not in login_session:
         return redirect('/login')
+    if editItem.user_id != user_id:
+        return "Your are not allowed to edit this item. Users are only allowed to edit Items they created."
+    if request.method == 'POST':
+        if request.form['name']:
+            editItem.name = request.form['name']
+        if request.form['descripttion']:
+            editItem.description = request.form['description']
+        if request.form['picture']:
+            editItem.picture = request.form['picture']
+        session.add(editItem)
+        session.commit()
+        flash("%s has been edited and saved." % editItem.name)
+        return redirect(url_for('category',
+                                expedition_id=expedition_id,
+                                category_id=category_id))
+    else:
+        return render_template('editItem.html',
+                               expedition_id=expedition_id,
+                               category_id=category_id,
+                               item=editItem)
 
 
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/item/'
            '<int:item_id>/delete/', methods=['GET', 'POST'])
 def deleteItem(expedition_id, category_id, item_id):
+    deleteItem = session.query(Item).filter_by(id=item_id, category_id=category_id, expedition_id=expedition_id)
+    user_id = createUser(login_session['email'])
     if 'username' not in login_session:
         return redirect('/login')
+    if deleteItem.user_id != user_id:
+        return "You are not allowed to delete this item. Users are only allowed to delete items they created."
+    if request.method == 'POST':
+        session.delete(deleteItem)
+        session.commit()
+        flash('You have successfully deleted %s' % deleteItem.name)
+    else:
+        return render_template('deleteItem.html',
+                               expedition_id= expedition_id,
+                               category_id=category_id,
+                               item=deleteItem)
 
 
 """ Create and edit Users in the database """
