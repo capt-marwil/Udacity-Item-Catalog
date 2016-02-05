@@ -347,7 +347,7 @@ def editExpedition(expedition_id):
     if 'username' not in login_session:
         return redirect('/login')
     if editedExpediton.user_id != user_id:
-        return "<script>function myFunction() { alert('You are not allowed to edit this expedition. Please create your own expedition to edit');</script><body onload='myFunction();'>"
+        return "You are not allowed to edit this expedition. Only Users how created an expedition are allowed to edit the informaiton."
     if request.method == 'POST':
         if request.form['title']:
             editedExpediton.title = request.form['title']
@@ -432,6 +432,14 @@ def addCategory(expedition_id):
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/edit',
            methods=['GET', 'POST'])
 def editCategory(expedition_id, category_id):
+    """
+    checks whether user is logged in
+    If called with GET displays form to edit a category
+    If called with POST saves the record.
+    :param expedition_id:
+    :param category_id:
+    :return: editCategory.html, category.html, login.html
+    """
     editCategory = session.query(Category).filter_by(id=category_id).filter(Category.expedition.any(id=expedition_id)).first()
     user_id = getUserID(login_session['email'])
     if 'username' not in login_session:
@@ -473,6 +481,7 @@ def deleteCategory(expedition_id, category_id):
 def addItem(expedition_id, category_id, item_id):
     if 'username' not in login_session:
         return redirect('/login')
+
 
 
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/item/'
