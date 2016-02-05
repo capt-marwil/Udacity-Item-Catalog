@@ -69,17 +69,16 @@ class Category(Base):
     def serialize_json(self):
         return {
             'id': self.id,
-            'name': self.id,
-            'description': self.id,
-            'picture': self.id,
-            'expedition': self.expedition
+            'name': self.name,
+            'description': self.description,
+            'picture': self.picture,
         }
 
 
 class Item(Base):
     __tablename__ = 'items'
     id = Column(Integer, primary_key=True)
-    name = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
     description = Column(String(255), nullable=False)
     picture = Column(String(255), nullable=True)
     user_id = Column(Integer, ForeignKey('users.id'))
