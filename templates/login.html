@@ -1,34 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Udacity Catalog Project</title>
+{% extends "base.html" %}
+{% block title %}Udacity Catalog Project: Login{% endblock %}
+{%block head %}
+    {{ super() }}
     <!-- These javascript libraries have to loaded in order to login with google -->
      <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <script src="https://apis.google.com/js/client:platform.js?onload" async defer></script>
-</head>
-<body>
-<!-- Button to login with Google -->
-<div id="signinButton">
-    <span class="g-signin"
-          data-scope="openid email"
-          data-clientid="871166559847-81upljugrh845i9l7tspl68ib3k55qmn.apps.googleusercontent.com"
-          data-redirecturi="postmessage"
-          data-accesstype="offline"
-          data-cookiepolicy="single_host_origin"
-          data-callback="signInCallback"
-          data-approvalprompt="force">
-    </span>
-</div>
-<!-- Button to login with Facebook -->
-<button class="btn btn-default" id="login">
-    <span class="glyphicon glyphicon-glass" aria-hidden="true"></span>
-    <fb:login-button scope="public_profile,email" onlogin="sendTokenToServer();">
-        <a href="javascript:sendTokenToServer()">Login with Facebook</a>
-    </fb:login-button>
-</button>
+{% endblock %}
+{% block body %}
 
-<div id="result"></div>
+<div id="row marketing">
+<!-- Button to login with Google -->
+    <div id="signinButton" class="col-lg-6">
+        <span class="g-signin"
+              data-scope="openid email"
+              data-clientid="871166559847-81upljugrh845i9l7tspl68ib3k55qmn.apps.googleusercontent.com"
+              data-redirecturi="postmessage"
+              data-accesstype="offline"
+              data-cookiepolicy="single_host_origin"
+              data-callback="signInCallback"
+              data-approvalprompt="force">
+        </span>
+    </div>
+<!-- Button to login with Facebook -->
+    <div id="fbsigninButton" class="col-lg-6">
+        <div class="btn btn-default" id="login">
+            <fb:login-button scope="public_profile,email" onlogin="sendTokenToServer();">
+                <a href="javascript:sendTokenToServer()">Login with Facebook</a>
+            </fb:login-button>
+        </div>
+    </div>
+    <div id="col-lg-12">
+        <div id="result">
+        </div>
+    </div>
+</div>
 <!-- Callbackfunction to login with Google -->
 <script>
 function signInCallback(authResult) {
@@ -112,5 +117,5 @@ function signInCallback(authResult) {
       }
 
 </script>
-</body>
+{% endblock %}
 </html>
