@@ -2,9 +2,7 @@ from flask import Flask, render_template, request, redirect, jsonify, url_for, \
     flash, make_response
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, relationship
-from flask_wtf import Form
-from wtforms import StringField, SubmitField, TextField, FileField
-from wtforms.validators import DataRequired
+from flask.ext.seasurf import SeaSurf
 from setup_database import Base, expeditions_categories, Expedition, Item, Category, User
 from flask import session as login_session
 from oauth2client.client import flow_from_clientsecrets
@@ -18,7 +16,7 @@ from xml.etree.ElementTree import dump, Element, SubElement
 
 
 app = Flask(__name__)
-
+csrf = SeaSurf(app)
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
 APPLICATION_NAME = "Expedition Packing list App"
@@ -95,7 +93,7 @@ def showLogin():
     # return "The current session state is %s" % login_session['state']
     return render_template('login.html', STATE=state)
 
-
+@csrf.exempt
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     # Validate state token
@@ -187,7 +185,7 @@ def gconnect():
 
     # DISCONNECT - Revoke a current user's token and reset their login_session
 
-
+@csrf.exempt
 @app.route('/gdisconnect')
 def gdisconnect():
     access_token = login_session['access_token']
@@ -218,7 +216,7 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
 
-
+@csrf.exempt
 @app.route('/fbconnect', methods=['POST'])
 def fbconnect():
     if request.args.get('state') != login_session['state']:
@@ -285,7 +283,7 @@ def fbconnect():
     return output
 
 
-
+@csrf.exempt
 @app.route('/fbdisconnet')
 def fbdisconnect():
     facebook_id = login_session['facebook_id']
@@ -481,9 +479,9 @@ def deleteCategory(expedition_id, category_id):
         return redirect(url_for('expedition',
                                 expedition_id=expedition_id))
     else:
-        render_template('deleteCategory.html',
+        return render_template('deleteCategory.html',
                         expedition_id=expedition_id,
-                        category_id=category_id)
+                        category=deleteCategory)
 
 
 """ routes to manipulate Item entity """
@@ -557,6 +555,8 @@ def deleteItem(expedition_id, category_id, item_id):
         session.delete(deleteItem)
         session.commit()
         flash('You have successfully deleted %s' % deleteItem.name)
+        return redirect('category', expedition_id=expedition_id,
+                        category_id=category_id)
     else:
         return render_template('deleteItem.html',
                                expedition_id= expedition_id,
@@ -588,6 +588,25 @@ def createUser(login_session):
     return user.id
 
 """ routes to return data via json or xml apis """
+
+@app.route('/expedition/JSON')
+def getExpeditionJSON():
+    expeditions = session.query(Expedition).all()
+    return jsonify(expeditions=[e.serialize_json for e in expeditions])
+
+
+@app.route('/expedition/<int:expedition_id>/JSON')
+def getCategoriesJSON(expedition_id):
+    categories = session.query(Category).filter(Category.expedition.any(id=expedition_id)).all()
+    return jsonify(categories=[c.serialize_json for c in categories])
+
+
+@app.route('/expedition/<int:expedition_id>/category/<int:category_id>/JSON')
+def getItemsJSON(expedition_id, category_id):
+    items = session.query(Item).filter_by(category_id=category_id, expedition_id=expedition_id)
+    return jsonify(items=[i.serialize_json for c in items])
+
+
 
 @app.route('/expedition/<int:expedition_id>/xml')
 def getExpeditionXML(expedition_id):
