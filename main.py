@@ -447,7 +447,6 @@ def editCategory(expedition_id, category_id):
     if editCategory.user_id != user_id:
         return "Your are not allowed to edit this category. Users are only allowed to edit their own categories."
     if request.method == 'POST':
-        print("ich lande im Post")
         if request.form['name']:
             editCategory.name = request.form['name']
         if request.form['description']:
@@ -478,9 +477,27 @@ def deleteCategory(expedition_id, category_id):
 
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/item/'
            'new/', methods=['GET', 'POST'])
-def addItem(expedition_id, category_id, item_id):
+def addItem(expedition_id, category_id):
     if 'username' not in login_session:
         return redirect('/login')
+    if request.method == 'POST':
+        user_id = getUserID(login_session['email'])
+        newItem = Item(
+                    user_id=user_id,
+                    category_id=category_id,
+                    expediton_id=expedition_id,
+                    name=request.form['name'],
+                    description=request.form['description'],
+                    picture=request.form['picture']
+                    )
+        session.add(newItem)
+        session.commit()
+        return redirect(url_for('category'),
+                        expedition_id=expedition_id,
+                        category_id=category_id)
+
+    else:
+        return render_template('addItem.html', expedition_id=expedition_id, category_id=category_id)
 
 
 
