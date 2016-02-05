@@ -398,6 +398,13 @@ def deleteExpedition(expedition_id):
 @app.route('/expedition/<int:expedition_id>/category/'
            'new/', methods=['GET', 'POST'])
 def addCategory(expedition_id):
+    """
+    checks whether user is logged in
+    If called with GET displays form to add a category
+    If called with POST adds the record.
+    :param expedition_id:
+    :return: addCategory.html, expedition, login
+    """
     expedition = session.query(Expedition).filter_by(id=expedition_id).one()
     user_id = getUserID(login_session['email'])
     if 'username' not in login_session:
