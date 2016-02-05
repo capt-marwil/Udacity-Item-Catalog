@@ -10,7 +10,6 @@
            <p><img src="{{ category.picture  }}" class="img-responsive"></p>
         <h1>{{ category.name }}</h1>
         <p class="lead">{{ category.description }}</p>
-        <p><a class="btn btn-lg btn-success" href="{{ url_for('login') }}" role="button">Sign in</a></p>
       </div>
       <div class="row marketing">
 
@@ -27,9 +26,9 @@
               {% endif %}
       </div>
         <div class="row">
-            <p class="col-lg-2"><a href="{{ url_for('editCategory', expedition_id=expedition.id, category_id=category.id) }}">Edit Category</a> </p>
-            <p class="col-lg-2"><a href="{{ url_for('deleteCategory', expedition_id=expedition.id, category_id=category.id) }}">Delete Category</a> </p>
-            <p class="col-lg-8"></p>
+            <p class="col-lg-4"><a href="{{ url_for('editCategory', expedition_id=expedition.id, category_id=category.id) }}">Edit Category</a> </p>
+            <p class="col-lg-4"><a href="{{ url_for('deleteCategory', expedition_id=expedition.id, category_id=category.id) }}">Delete Category</a> </p>
+            <p class="col-lg-4"></p>
         </div>
       <footer class="footer">
         <p>&copy; 2016 Company, Inc.</p>

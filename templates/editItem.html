@@ -24,6 +24,7 @@
             <p><label for="picture">Please Enter the URL of the New Picture</label></p>
             <p><input type="text" name="picture" placeholder="{{ item.picture }}"></p>
             <p><input type="submit" class="" value="Save"><a href="{{ url_for('category', expedition_id=expedition_id, category_id=category_id)}}">Cancel</a></p>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
         </form>
         </div>
       </div>
