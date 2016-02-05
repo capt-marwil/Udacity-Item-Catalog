@@ -12,22 +12,27 @@
       </div>
       <div class="row marketing">
 
-          {% if categories != [] %}
+          {% if categories.count() != 0 %}
             <div class="col-lg-12">
-              <h1>irgendetwas war in categories</h1>
+              <h1></h1>
                 {% for c in categories %}
 
           <h4><a href="{{ url_for('category', expedition_id=expedition.id, category_id=c.id) }}">{{ c.name }}</a></h4>
           <p>{{ c.description|truncate(110, True) }}</p>
+                        <div class="row">
+            <p class="col-lg-4"><a href="{{ url_for('editCategory', expedition_id=expedition.id, category_id=c.id) }}">Edit Category</a> </p>
+            <p class="col-lg-4"><a href="{{ url_for('deleteCategory', expedition_id=expedition.id, category_id=c.id) }}">Delete Category</a> </p>
+            <p class="col-lg-4"></p>
+        </div>
                 {% endfor %}
             {% else %}
-          <p>So far no categories for activities <a href="{{ url_for('login') }}">Login</a> to create a new category and start adding stuff!</p>
+          <p>So far no categories for activities have been registered. Please <a href="{{ url_for('addCategory', expedition_id=expedition.id) }}">add</a> a new category!</p>
                 {% endif %}
       </div>
         <div class="row">
-            <p class="col-lg-2"><a href="{{ url_for('editExpedition', expedition_id=expedition.id) }}">Edit Expedition</a> </p>
-            <p class="col-lg-2"><a href="{{ url_for('deleteExpedition', expedition_id=expedition.id) }}">Delete Expedition</a> </p>
-            <p class="col-lg-8"></p>
+            <p class="col-lg-4"><a href="{{ url_for('editExpedition', expedition_id=expedition.id) }}">Edit Expedition</a> </p>
+            <p class="col-lg-4"><a href="{{ url_for('deleteExpedition', expedition_id=expedition.id) }}">Delete Expedition</a> </p>
+            <p class="col-lg-4"></p>
         </div>
       <footer class="footer">
         <p>&copy; 2016 Company, Inc.</p>

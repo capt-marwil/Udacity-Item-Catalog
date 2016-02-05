@@ -55,6 +55,7 @@ def expedition(expedition_id):
     expedition = session.query(Expedition).filter_by(id=expedition_id).one()
     categories = session.query(Category).filter(Category.expedition.any(
         id=expedition_id))
+    print str()
     if 'username' not in login_session:
         return render_template('public_expedition.html',
                                expedition=expedition,
@@ -70,7 +71,7 @@ def category(expedition_id, category_id):
     expedition = session.query(Expedition).filter_by(id=expedition_id).one()
     category = session.query(Category).filter_by(id=category_id).one()
     items = session.query(Item).filter_by(category_id=category_id,
-                                          expedition_id=expedition_id).all()
+                                          expedition_id=expedition_id)
     return render_template('category.html', category=category,
                                             expedition=expedition,
                                             items=items)
@@ -369,7 +370,7 @@ def editExpedition(expedition_id):
            'delete', methods=['GET', 'POST'])
 def deleteExpedition(expedition_id):
     """
-    Checks whether user is logged in
+    checks whether user is logged in
     If called with GET displays form to delete an expedition record
     If called with POST deletes the record.
     :param expedition_id:
@@ -391,18 +392,34 @@ def deleteExpedition(expedition_id):
                                expedition=deleteExpedition)
 
 
-
-
-
-
 """ routes to manipulate Category entities """
 
 
 @app.route('/expedition/<int:expedition_id>/category/'
            'new/', methods=['GET', 'POST'])
-def addCategory(expedition_id, category_id):
+def addCategory(expedition_id):
+    expedition = session.query(Expedition).filter_by(id=expedition_id).one()
+    user_id = getUserID(login_session['email'])
     if 'username' not in login_session:
         return redirect('/login')
+    if request.method == 'POST':
+        newCategory = Category(name=request.form['name'],
+                               description=request.form['description'],
+                               picture=request.form['picture'],
+                               user_id=user_id)
+        expedition.category.append(newCategory)
+        #newCategory.expedition.append(expedition)
+        session.add(newCategory)
+        session.commit()
+        items = session.query(Item).filter_by(id=newCategory.id).all()
+        flash('%s added as a new category.' % newCategory.name)
+        return redirect(url_for('expedition',
+                                expedition_id=expedition.id,
+                                category=newCategory,
+                                items=items))
+    else:
+        return render_template('addCategory.html',
+                               expedition=expedition)
 
 
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/'
