@@ -395,8 +395,8 @@ def deleteExpedition(expedition_id):
 """ routes to manipulate Category entities """
 
 
-@app.route('/expedition/<int:expedition_id>/category/'
-           'new/', methods=['GET', 'POST'])
+@app.route('/expedition/<int:expedition_id>/category/new/',
+           methods=['GET', 'POST'])
 def addCategory(expedition_id):
     """
     checks whether user is logged in
@@ -428,12 +428,34 @@ def addCategory(expedition_id):
         return render_template('addCategory.html',
                                expedition=expedition)
 
-
-@app.route('/expedition/<int:expedition_id>/category/<int:category_id>/'
-           'edit', methods=['GET', 'POST'])
+#/expedition/3/category/4/edit
+@app.route('/expedition/<int:expedition_id>/category/<int:category_id>/edit',
+           methods=['GET', 'POST'])
 def editCategory(expedition_id, category_id):
+    editCategory = session.query(Category).filter_by(id=category_id).filter(Category.expedition.any(id=expedition_id)).first()
+    user_id = getUserID(login_session['email'])
     if 'username' not in login_session:
         return redirect('/login')
+    if editCategory.user_id != user_id:
+        return "Your are not allowed to edit this category. Users are only allowed to edit their own categories."
+    if request.method == 'POST':
+        print("ich lande im Post")
+        if request.form['name']:
+            editCategory.name = request.form['name']
+        if request.form['description']:
+            editCategory.description = request.form['description']
+        if request.form['picture']:
+            editCategory.picture = request.form['picture']
+        #session.add(editCategory)
+        #session.commit()
+        flash('You have successsfully edited your Category.')
+        return redirect(url_for('category',
+                                expedition_id=expedition_id,
+                                category_id=editCategory.id))
+    else:
+        return render_template('editCategory.html',
+                               expedition_id=expedition_id,
+                               category=editCategory)
 
 
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/'
