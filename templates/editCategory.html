@@ -1,37 +1,68 @@
 {% extends "base.html" %}
 {% block title %}Edit {{ category.name }}{% endblock %}
 {%block head %}
-    {{ super() }}
+{{ super() }}
 {% endblock %}
 {% block body %}
 <!--
 <div class="jumbotron">
-    <p></p>
-        <h1></h1>
-        <p class="lead"></p>
-        <p></p>
+<p></p>
+<h1></h1>
+<p class="lead"></p>
+<p></p>
 </div>
 -->
-      <div class="row marketing">
-          <div class="coll-lg-12">
-        <form action="{{ url_for('editCategory', expedition_id=expedition_id, category_id=category.id ) }}" method="post" enctype="multipart/form-data">
-            <p><label for="name">Please enter a new name for the category:</label></p>
-            <p>
-                <input name="name" placeholder="{{ category.name }}">
-            </p>
-            <p><label for="description">Please describe what's supposed to be in this category.</label></p>
-            <p><textarea name="description" placeholder="{{ category.description }}"></textarea></p>
-            <p><label for="picture">Please Enter the URL of the New Picture</label></p>
-            <p><input type="text" name="picture" placeholder="{{ category.picture }}"></p>
-            <p><input type="submit" class="" value="Save"><a href="{{ url_for('expedition', expedition_id=expedition_id)}}">Cancel</a></p>
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+<div class="row marketing">
+    <div class="coll-lg-12">
+        <form role="form" action="{{ url_for('editCategory', expedition_id=expedition_id, category_id=category.id ) }}" method="post" enctype="multipart/form-data">
+            <div class="form-group-lg">
+                <p>
+                    <label for="name" id="name">
+                        Please enter a new name for the category:
+                    </label>
+                </p>
+                <p>
+                    <input name="name" class="form-control" placeholder="{{ category.name }}" aria-labelledby="name">
+                </p>
+            </div>
+            <div class="form-group-lg">
+                <p>
+                    <label for="description" id="description">
+                        Please enter a new description.
+                    </label>
+                </p>
+                <p>
+                    <textarea name="description" class="form-control" placeholder="{{ category.description }}" aria-labelledby="description"></textarea>
+                </p>
+            </div>
+            <div class="form-group-lg">
+                <p>
+                    <label for="picture" id="picture">
+                        Please Enter the URL of the New Picture
+                    </label>
+                </p>
+                <p>
+                    <input type="text" class="form-control" name="picture" placeholder="{{ category.picture }}" aria-labelledby="picture">
+                </p>
+            </div>
+            <div class="form-group-lg">
+                <p>
+                    <button type="submit" class="btn btn-primary">
+                        Save
+                    </button>&nbsp;
+                    <a href="{{ url_for('expedition', expedition_id=expedition_id)}}" class="btn btn-primary">
+                        Cancel
+                    </a>
+                </p>
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            </div>
         </form>
-        </div>
-      </div>
-
-      <footer class="footer">
-        <p>&copy; 2016 Company, Inc.</p>
-      </footer>
-
-    </div> <!-- /container -->
+    </div>
+</div>
+<footer class="footer">
+    <p>
+        &copy; 2016 Company, Inc.
+    </p>
+</footer>
+</div> <!-- /container -->
 {% endblock %}

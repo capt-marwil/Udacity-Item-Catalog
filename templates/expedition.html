@@ -1,42 +1,81 @@
 {% extends "base.html" %}
-{% block title %}Expedition{% endblock %}
+{% block title %} {{ expedition.title }} {% endblock %}
 {%block head %}
     {{ super() }}
 {% endblock %}
 {% block body %}
 
-      <div class="jumbotron">
-           <p><img src="{{ expedition.picture }}" class="img-responsive"></p>
-        <h1>{{ expedition.title }}</h1>
-        <p class="lead">{{ expedition.description }}</p>
-      </div>
-      <div class="row marketing">
-
-          {% if categories.count() != 0 %}
-            <div class="col-lg-12">
-              <h1></h1>
-                {% for c in categories %}
-
-          <h4><a href="{{ url_for('category', expedition_id=expedition.id, category_id=c.id) }}">{{ c.name }}</a></h4>
-          <p>{{ c.description|truncate(110, True) }}</p>
-                        <div class="row">
-            <p class="col-lg-4"><a href="{{ url_for('editCategory', expedition_id=expedition.id, category_id=c.id) }}">Edit Category</a> </p>
-            <p class="col-lg-4"><a href="{{ url_for('deleteCategory', expedition_id=expedition.id, category_id=c.id) }}">Delete Category</a> </p>
-            <p class="col-lg-4"></p>
-        </div>
-                {% endfor %}
-            {% else %}
-          <p>So far no categories for activities have been registered. Please <a href="{{ url_for('addCategory', expedition_id=expedition.id) }}">add</a> a new category!</p>
-                {% endif %}
-      </div>
+<div class="jumbotron">
+    <p>
+        <img src="{{ expedition.picture }}" class="img-responsive">
+    </p>
+    <h1>
+        {{ expedition.title }}
+    </h1>
+    <p class="lead">
+        {{ expedition.description }}
+    </p>
+    <p>
+        <a class="btn btn-lg btn-primary" href="{{ url_for('addCategory', expedition_id=expedition.id)}}">
+            Add a category
+        </a>
+    </p>
+</div>
+<!-- container -->
+<div class="row marketing">
+    {% if categories.count() != 0 %}
+    <div class="col-lg-12">
+        {% for c in categories %}
+        <h4>
+            <a href="{{ url_for('category', expedition_id=expedition.id, category_id=c.id) }}">
+                {{ c.name }}
+            </a>
+        </h4>
+        <p>
+            {{ c.description|truncate(110, True) }}
+        </p>
         <div class="row">
-            <p class="col-lg-4"><a href="{{ url_for('editExpedition', expedition_id=expedition.id) }}">Edit Expedition</a> </p>
-            <p class="col-lg-4"><a href="{{ url_for('deleteExpedition', expedition_id=expedition.id) }}">Delete Expedition</a> </p>
-            <p class="col-lg-4"></p>
+            <p class="col-lg-4">
+                <a href="{{ url_for('editCategory', expedition_id=expedition.id, category_id=c.id) }}">
+                    Edit Category
+                </a>
+            </p>
+        <p class="col-lg-4">
+            <a href="{{ url_for('deleteCategory', expedition_id=expedition.id, category_id=c.id) }}">
+                Delete Category
+            </a>
+        </p>
+        <p class="col-lg-4">
+        </p>
         </div>
-      <footer class="footer">
-        <p>&copy; 2016 Company, Inc.</p>
-      </footer>
-
-    </div> <!-- /container -->
+        {% endfor %}
+    {% else %}
+        <p>
+            So far no categories for activities have been registered. Please
+            <a href="{{ url_for('addCategory', expedition_id=expedition.id) }}">
+            add
+            </a>
+            a new category!
+        </p>
+    {% endif %}
+    </div>
+    <div class="row">
+        <p class="col-lg-4">
+            <a href="{{ url_for('editExpedition', expedition_id=expedition.id) }}">
+                Edit Expedition
+            </a>
+        </p>
+        <p class="col-lg-4">
+            <a href="{{ url_for('deleteExpedition', expedition_id=expedition.id) }}">
+                Delete Expedition
+            </a>
+        </p>
+        <p class="col-lg-4"></p>
+    </div>
+    <footer class="footer">
+        <p>
+            &copy; 2016 Company, Inc.
+        </p>
+    </footer>
+</div> <!-- /container -->
 {% endblock %}

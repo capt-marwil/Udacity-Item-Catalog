@@ -12,26 +12,54 @@
         <p></p>
 </div>
 -->
-      <div class="row marketing">
-          <div class="coll-lg-12">
-        <form action="{{ url_for('addItem', expedition_id=expedition_id, category_id=category_id) }}" method="post" enctype="multipart/form-data">
-            <p><label for="name">Please enter the items name:</label></p>
-            <p>
-                <input name="name" placeholder="Item name">
-            </p>
-            <p><label for="description">Please describe the item.</label></p>
-            <p><textarea name="description"></textarea></p>
-            <p><label for="picture">Please enter the pictures Url.</label></p>
-            <p><input type="text" name="picture"></p>
-            <p><input type="submit" class="" value="Save"><a href="{{ url_for('category', expedition_id=expedition_id, category_id=category_id) }}">Cancel</a></p>
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+<div class="row marketing">
+    <div class="coll-lg-12">
+        <form role="form" action="{{ url_for('addItem', expedition_id=expedition_id, category_id=category_id) }}" method="post" enctype="multipart/form-data">
+            <div class="form-group-lg">
+                <p>
+                    <label for="name" id="name">
+                        Please enter the items name:
+                    </label>
+                </p>
+                <p>
+                    <input name="name" class="form-control" placeholder="Item name" aria-labelledby="name">
+                </p>
+            </div>
+            <div class="form-control-lg">
+                <p>
+                    <label for="description" id="description">
+                        Please describe the item.
+                    </label>
+                </p>
+                <p>
+                    <textarea name="description" class="form-control" aria-labelledby="description"></textarea>
+                </p>
+            </div>
+            <div class="form-group-lg">
+                <p>
+                    <label for="picture" id="picture">
+                        Please enter Url of the image.
+                    </label>
+                </p>
+                <p>
+                    <input type="text" name="picture" class="form-control" aria-labelledby="picture">
+                </p>
+            </div>
+            <div class="form-control-lg">
+                <p>
+                    <button type="submit" class="btn btn-primary">Save</button>&nbsp;
+                    <a href="{{ url_for('category', expedition_id=expedition_id, category_id=category_id) }}" class="btn-primary btn">
+                        Cancel
+                    </a>
+                </p>
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            </div>
         </form>
-        </div>
-      </div>
-
-      <footer class="footer">
+    </div>
+</div>
+    <footer class="footer">
         <p>&copy; 2016 Company, Inc.</p>
-      </footer>
+    </footer>
 
-    </div> <!-- /container -->
+</div> <!-- /container -->
 {% endblock %}

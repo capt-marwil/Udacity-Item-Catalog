@@ -12,19 +12,25 @@
         <p></p>
 </div>
 -->
-      <div class="row marketing">
-          <div class="coll-lg-12">
-        <form action="{{ url_for('deleteCategory', expedition_id=expedition_id, category_id=category.id ) }}" method="post" enctype="multipart/form-data">
-            <p>Are you shure you want to delete <h2>{{ category.name }}</h2></p>
-            <p><input type="submit" class="btn-danger" value="Delete"><a href="{{ url_for('expedition', expedition_id=expedition_id)}}">Cancel</a></p>
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+<div class="row marketing">
+    <div class="coll-lg-12">
+        <form role="form" action="{{ url_for('deleteCategory', expedition_id=expedition_id, category_id=category.id ) }}" method="post" enctype="multipart/form-data">
+            <div class="form-group-lg">
+                <p>
+                    Are you sure you want to delete <h2>{{ category.name }}</h2>
+                </p>
+                <p>
+                    <button type="submit" class="btn btn-danger">Delete</button>&nbsp;
+                    <a href="{{ url_for('expedition', expedition_id=expedition_id)}}" class="btn btn-primary">Cancel</a>
+                </p>
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            </div>
         </form>
-        </div>
-      </div>
+    </div>
+</div>
+<footer class="footer">
+    <p>&copy; 2016 Company, Inc.</p>
+</footer>
 
-      <footer class="footer">
-        <p>&copy; 2016 Company, Inc.</p>
-      </footer>
-
-    </div> <!-- /container -->
+</div> <!-- /container -->
 {% endblock %}

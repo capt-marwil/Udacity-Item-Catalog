@@ -14,18 +14,39 @@
 -->
       <div class="row marketing">
           <div class="coll-lg-12">
-        <form action="{{ url_for('addCategory', expedition_id=expedition.id) }}" method="post" enctype="multipart/form-data">
-            <p><label for="name">Please enter a category name:</label></p>
-            <p>
-                <input name="name" placeholder="Name of the cate">
-            </p>
-            <p><label for="description">Please describe the category.</label></p>
-            <p><textarea name="description"></textarea></p>
-            <p><label for="picture"></label></p>
-            <p><input type="text" name="picture"></p>
-            <p><input type="submit" class="" value="Save"><a href="{{ url_for('index')}}">Cancel</a></p>
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-        </form>
+        <form role="form" action="{{ url_for('addCategory', expedition_id=expedition.id) }}" method="post" enctype="multipart/form-data">
+
+            <div class="form-group-lg">
+                <p>
+                    <label for="name" id="name">Please enter a category name:</label>
+                </p>
+                <p>
+                    <input name="name" placeholder="Enter category name" aria-labelledby="name" class="form-control">
+                </p>
+            </div>
+            <div class="form-group-lg">
+                <p>
+                    <label for="description" id="description">Please add a short descripiton of the category.</label>
+                </p>
+                <p>
+                    <textarea name="description" aria-labelledby="description" class="form-control"></textarea>
+                </p>
+            </div>
+            <div class="form-group-lg">
+                <p>
+                    <label for="picture" id="picture">Please provide an URL to the image.</label>
+                </p>
+                <p>
+                    <input type="text" name="picture" aria-labelledby="picture" class="form-control">
+                </p>
+            </div>
+            <div class="form-group-lg">
+                <p>
+                    <button type="submit" class="btn btn-primary">Save</button>&nbsp;<a href="{{ url_for('index')}}" class=" btn btn-primary">Cancel</a>
+                </p>
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            </div>
+       </form>
         </div>
       </div>
 

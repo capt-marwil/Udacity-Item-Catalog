@@ -12,26 +12,58 @@
         <p></p>
 </div>
 -->
-      <div class="row marketing">
-          <div class="coll-lg-12">
-        <form action="{{ url_for('editItem', expedition_id=expedition_id, category_id=category.id, item_id=item.id ) }}" method="post" enctype="multipart/form-data">
-            <p><label for="name">Please enter a new name for the item:</label></p>
+<div class="row marketing">
+    <div class="coll-lg-12">
+        <form role="form" action="{{ url_for('editItem', expedition_id=expedition_id, category_id=category.id, item_id=item.id ) }}" method="post" enctype="multipart/form-data">
+            <div class="form-group-lg">
+                <p>
+                    <label for="name" id="name">
+                        Please enter a new name for the item:
+                    </label>
+                </p>
+                <p>
+                    <input name="name" class="form-control" placeholder="{{ item.name }}" aria-labelledby="name">
+                </p>
+            </div>
+            <div class="form-group-lg">
+                <p>
+                    <label for="description" id="description">
+                        Please update this items description.
+                    </label>
+                </p>
+                <p>
+                    <textarea name="description" class="form-control" placeholder="{{ item.description }}" aria-labelledby="description"></textarea>
+                </p>
+            </div>
+            <div class="form-group-lg">
+                <p>
+                    <label for="picture" id="picture">
+                        Please enter the URL of the new image
+                    </label>
+                </p>
             <p>
-                <input name="name" placeholder="{{ item.name }}">
+                <input type="text" name="picture" class="form-control" placeholder="{{ item.picture }}" aria-labelledby="picture">
             </p>
-            <p><label for="description">Please Update this items description.</label></p>
-            <p><textarea name="description" placeholder="{{ item.description }}"></textarea></p>
-            <p><label for="picture">Please Enter the URL of the New Picture</label></p>
-            <p><input type="text" name="picture" placeholder="{{ item.picture }}"></p>
-            <p><input type="submit" class="" value="Save"><a href="{{ url_for('category', expedition_id=expedition_id, category_id=category_id)}}">Cancel</a></p>
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            </div>
+            <div class="form-group-lg">
+                <p>
+                    <button type="submit" class="btn btn-primary">
+                        Save
+                    </button>
+                        &nbsp;
+                    <a href="{{ url_for('category', expedition_id=expedition_id, category_id=category_id)}}">
+                        Cancel
+                    </a>
+                </p>
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            </div>
         </form>
-        </div>
-      </div>
-
-      <footer class="footer">
-        <p>&copy; 2016 Company, Inc.</p>
-      </footer>
-
-    </div> <!-- /container -->
+    </div>
+</div>
+<footer class="footer">
+    <p>
+        &copy; 2016 Company, Inc.
+    </p>
+</footer>
+</div> <!-- /container -->
 {% endblock %}

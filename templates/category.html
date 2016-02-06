@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Index{% endblock %}
+{% block title %}{{ category.name }}{% endblock %}
 {%block head %}
     {{ super() }}
 {% endblock %}
@@ -10,6 +10,11 @@
            <p><img src="{{ category.picture  }}" class="img-responsive"></p>
         <h1>{{ category.name }}</h1>
         <p class="lead">{{ category.description }}</p>
+          <p>
+        <a class="btn btn-lg btn-primary" href="{{ url_for('addItem', expedition_id=expedition.id, category_id=category.id)}}">
+            Add a new item
+        </a>
+    </p>
       </div>
       <div class="row marketing">
 
