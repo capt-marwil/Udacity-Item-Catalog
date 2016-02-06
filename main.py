@@ -12,7 +12,7 @@ import json
 import requests
 import random
 import string
-from xml.etree.ElementTree import dump, Element, SubElement
+from xml.etree.ElementTree import dump, Element, SubElement, Comment, tostring
 
 
 app = Flask(__name__)
@@ -164,6 +164,7 @@ def gconnect():
     login_session['username'] = data['name']
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
+    login_session['provider'] = 'google'
 
     # check whether user exists in local database
     if getUserID(login_session['email']):
@@ -208,13 +209,15 @@ def gdisconnect():
         del login_session['username']
         del login_session['email']
         del login_session['picture']
-        response = make_response(json.dumps('Successfully disconnected.'), 200)
-        response.headers['Content-Type'] = 'application/json'
-        return response
+        # response = make_response(json.dumps('Successfully disconnected.'), 200)
+        # response.headers['Content-Type'] = 'application/json'
+        flash('You have successfully been logged out.')
+        return redirect(url_for('index'))
     else:
-        response = make_response(json.dumps('Failed to revoke token for given user.', 400))
-        response.headers['Content-Type'] = 'application/json'
-        return response
+        # response = make_response(json.dumps('Failed to revoke token for given user.', 400))
+        # response.headers['Content-Type'] = 'application/json'
+        flash('Failed to revoke token for given user.')
+        return redirect(('index'))
 
 @csrf.exempt
 @app.route('/fbconnect', methods=['POST'])
@@ -295,7 +298,8 @@ def fbdisconnect():
     del login_session['email']
     del login_session['picture']
     del login_session['facebook_id']
-    return "You have been logged out"
+    flash('You have successfully been logged out.')
+    return redirect(url_for('index'))
 
 
 @app.route('/login')
@@ -305,7 +309,10 @@ def login():
 
 @app.route('/disconnet')
 def disconnet():
-    pass
+    if login_session['provider'] == 'facebook':
+        return redirect(url_for('fbdisconnect'))
+    if login_session['provider'] == 'google':
+        return redirect(url_for('gdisconnect'))
 
 """ routes to add, edit and delete database entities require a valid login """
 
@@ -608,21 +615,43 @@ def getItemsJSON(expedition_id, category_id):
 
 
 
-@app.route('/expedition/<int:expedition_id>/xml')
-def getExpeditionXML(expedition_id):
-    expedition = session.query(Expedition).filter_by(id=expedition_id).one()
-    root = Element('expedition', id=expedition.id)
-    title = SubElement(root, 'title')
-    description = SubElement(root, 'description')
-    title.text = expedition.title
-    description.text = expedition.description
-    response = make_response('REST API')
-    response.headers['Content-Type'] = 'application/xml'
-    dump(expedition)
+@app.route('/expedition/XML')
+def getExpeditionsXML():
+    expeditions = session.query(Expedition).all()
+    root = Element('AllExpeditions')
+    comment = Comment('XML Endpoint Listing all Expeditions currently listed')
+    root.append(comment)
+    for e in expeditions:
+        title = SubElement(root, 'title')
+        description = SubElement(root, 'description')
+        title.text = e.title
+        description.text = e.description
+
+    print tostring(root)
+    return app.response_class(tostring(root), mimetype='application/xml')
+
+
+@app.route('/expedition/<int:expedition_id>/category/XML')
+def getCategoriesXML(expedition_id):
+    expedition = session.query(Expedition).filter_by(id=expedition_id).first()
+    categories = session.query(Category).filter(Category.expedition.any(id=expedition_id)).all()
+    root = Element('allCategories')
+    comment = Comment('XML Endpoint Listing all Categories for a specific Expedition')
+    root.append(comment)
+    ex = SubElement(root, 'expedition')
+    ex.text = expedition.title
+    for c in categories:
+        category = SubElement(ex, 'category')
+        description = SubElement(ex, 'description')
+        picture = SubElement(ex, 'picture')
+        category.text = c.name
+        description.text = c.description
+        picture.text = c.picture
+    print tostring(root)
+    return app.response_class(tostring(root), mimetype='application/xml')
 
 
 if __name__ == '__main__':
     app.secret_key = 'secret_shmecret'
     app.debug = True
     app.run(host='0.0.0.0', port=8080)
-
