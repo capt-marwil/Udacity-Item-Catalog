@@ -4,40 +4,74 @@
     {{ super() }}
 {% endblock %}
 {% block body %}
+<div class="row">
+    <div class="col-lg-12">
+        <ol class="breadcrumb">
+            <li>
+                <a href="{{ url_for('expedition', expedition_id=expedition.id) }}">
+                    {{ expedition.title }}
+                </a>
+            </li>
+            <li class="active">
+                {{ category.name }}
+            </li>
+        </ol>
+    </div>
+</div>
 
-
-      <div class="jumbotron">
-           <p><img src="{{ category.picture  }}" class="img-responsive"></p>
-        <h1>{{ category.name }}</h1>
-        <p class="lead">{{ category.description }}</p>
-          <p>
+<div class="jumbotron">
+    <p>
+        <img src="{{ category.picture  }}" class="img-responsive">
+    </p>
+    <h1>
+        {{ category.name }}
+    </h1>
+    <p class="lead">
+        {{ category.description }}
+    </p>
+    <p>
         <a class="btn btn-lg btn-primary" href="{{ url_for('addItem', expedition_id=expedition.id, category_id=category.id)}}">
             Add a new item
         </a>
     </p>
-      </div>
-      <div class="row marketing">
+</div>
+<div class="row marketing">
+    {% if items.count() == 0 %}
 
-          {% if items.count() == 0 %}
-
-          <p>So far no items have been added to {{ category.name }}. Feel free to <a href="{{ url_for('addItem', expedition_id=expedition.id, category_id = category.id) }}">add</a> all the items you deem necessary</p>
-           {% else %}
-          <div class="col-lg-12">
-              {% for i in items %}
-
-          <h4><a href="{{ url_for('item', expedition_id=expedition.id, category_id=category.id, item_id=i.id) }}">{{ i.name }}</a></h4>
-          <p>{{ i.description|truncate(110, True) }}</p>
-          {% endfor %}
-              {% endif %}
-      </div>
-        <div class="row">
-            <p class="col-lg-4"><a href="{{ url_for('editCategory', expedition_id=expedition.id, category_id=category.id) }}">Edit Category</a> </p>
-            <p class="col-lg-4"><a href="{{ url_for('deleteCategory', expedition_id=expedition.id, category_id=category.id) }}">Delete Category</a> </p>
-            <p class="col-lg-4"></p>
-        </div>
-      <footer class="footer">
-        <p>&copy; 2016 Company, Inc.</p>
-      </footer>
-
-    </div> <!-- /container -->
+    <p>
+        So far no items have been added to {{ category.name }}. Feel free to <a href="{{ url_for('addItem', expedition_id=expedition.id, category_id = category.id) }}">add</a> all the items you deem necessary
+    </p>
+    {% else %}
+    <div class="col-lg-12">
+        {% for i in items %}
+            <h4>
+                <a href="{{ url_for('item', expedition_id=expedition.id, category_id=category.id, item_id=i.id) }}">
+                    {{ i.name }}
+                </a>
+            </h4>
+        <p>
+            {{ i.description|truncate(110, True) }}
+        </p>
+        {% endfor %}
+    {% endif %}
+</div>
+<div class="row">
+    <p class="col-lg-4">
+        <a href="{{ url_for('editCategory', expedition_id=expedition.id, category_id=category.id) }}">
+            Edit Category
+        </a>
+    </p>
+    <p class="col-lg-4">
+        <a href="{{ url_for('deleteCategory', expedition_id=expedition.id, category_id=category.id) }}">
+            Delete Category
+        </a>
+    </p>
+    <p class="col-lg-4"></p>
+</div>
+<footer class="footer">
+    <p>
+        &copy; 2016 Company, Inc.
+    </p>
+</footer>
+</div> <!-- /container -->
 {% endblock %}

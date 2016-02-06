@@ -4,35 +4,45 @@
     {{ super() }}
 {% endblock %}
 {% block body %}
-
+<div class="row">
+    <div class="col-lg-12">
+        <ol class="breadcrumb">
+            <li>
+                <a href="{{ url_for('expedition', expedition_id=item.expedition.id) }}">
+                    {{ item.expedition.title }}
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('category', expedition_id=item.expedition.id, category_id=item.category.id) }}">
+                    {{ item.category.name }}
+                </a>
+            </li>
+            <li class="active">
+                {{ item.name }}
+            </li>
+        </ol>
+    </div>
+</div>
 <div class="jumbotron">
     <p>
         <img src="{{ item.picture }}" class="img-responsive">
     </p>
     <h1>
-        {{ expedition.title }}
+        {{ item.name }}
     </h1>
     <p class="lead">
         {{ item.description }}
     </p>
 </div>
-<div class="row marketing">
-    <h4>
-        {{ i.name }}
 
-    </h4>
-    <p>
-        {{ i.description|truncate(110, True) }}
-    </p>
-</div>
 <div class="row">
     <p class="col-lg-4">
-        <a href="{{ url_for('editItem', expedition_id=expedition.id) }}">
+        <a href="{{ url_for('editItem', expedition_id=item.expedition.id, category_id=item.category.id, item_id=item.id) }}">
             Edit Item
         </a>
     </p>
     <p class="col-lg-4">
-        <a href="{{ url_for('deleteItem', expedition_id=expedition.id) }}">
+        <a href="{{ url_for('deleteItem', expedition_id=item.expedition.id, category_id=item.category.id, item_id=item.id) }}">
             Delete Item
         </a>
     </p>
