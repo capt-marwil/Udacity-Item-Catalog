@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request, redirect, jsonify, url_for, \
     flash, make_response
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker
 from flask.ext.seasurf import SeaSurf
-from setup_database import Base, expeditions_categories, Expedition, Item, Category, User
+from setup_database import Base, Expedition, Item, Category, User
 from flask import session as login_session
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
@@ -12,7 +12,7 @@ import json
 import requests
 import random
 import string
-from xml.etree.ElementTree import dump, Element, SubElement, Comment, tostring
+from xml.etree.ElementTree import Element, SubElement, Comment, tostring
 
 
 app = Flask(__name__)
@@ -76,9 +76,15 @@ def category(expedition_id, category_id):
 
 
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/'
-           'item/<int:item_id>', methods=['GET', 'POST'])
+           'item/<int:item_id>')
 def item(expedition_id, category_id, item_id):
-    pass
+    item = session.query(Item).filter_by(id=item_id,
+                                         category_id=category_id,
+                                         expedition_id=expedition_id).one()
+    return render_template('item.html',
+                           expedition_id=expedition_id,
+                           category_id=category_id,
+                           item=item)
 
 
 """ routes to login and to logout """
@@ -179,7 +185,8 @@ def gconnect():
     output += '!</h1>'
     output += '<img src="'
     output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+    output += ' " style = ' \
+              '"width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
     flash("you are now logged in as %s" % login_session['username'])
     print "done!"
     return output
@@ -211,13 +218,13 @@ def gdisconnect():
         del login_session['picture']
         # response = make_response(json.dumps('Successfully disconnected.'), 200)
         # response.headers['Content-Type'] = 'application/json'
-        flash('You have successfully been logged out.')
+        flash('You have successfully been logged out of your Google account.')
         return redirect(url_for('index'))
     else:
         # response = make_response(json.dumps('Failed to revoke token for given user.', 400))
         # response.headers['Content-Type'] = 'application/json'
         flash('Failed to revoke token for given user.')
-        return redirect(('index'))
+        return redirect(url_for('index'))
 
 @csrf.exempt
 @app.route('/fbconnect', methods=['POST'])
@@ -232,7 +239,12 @@ def fbconnect():
     app_id = json.loads(open('fb_client_secret.json', 'r').read())['web']['app_id']
     app_secret = json.loads(open('fb_client_secret.json', 'r').read())['web']['app_secret']
 
-    url = "https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s" % (app_id, app_secret, access_token)
+    url = """
+        https://graph.facebook.com/oauth/access_token?
+        grant_type=fb_exchange_token&client_id=%s
+        &client_secret=%s&fb_exchange_token=%s" %
+         (app_id, app_secret, access_token)
+         """
 
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
@@ -504,16 +516,16 @@ def addItem(expedition_id, category_id):
         newItem = Item(
                     user_id=user_id,
                     category_id=category_id,
-                    expediton_id=expedition_id,
+                    expedition_id=expedition_id,
                     name=request.form['name'],
                     description=request.form['description'],
                     picture=request.form['picture']
                     )
         session.add(newItem)
         session.commit()
-        return redirect(url_for('category'),
+        return redirect(url_for('category',
                         expedition_id=expedition_id,
-                        category_id=category_id)
+                        category_id=category_id))
 
     else:
         return render_template('addItem.html', expedition_id=expedition_id, category_id=category_id)
@@ -552,8 +564,8 @@ def editItem(expedition_id, category_id, item_id):
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/item/'
            '<int:item_id>/delete/', methods=['GET', 'POST'])
 def deleteItem(expedition_id, category_id, item_id):
-    deleteItem = session.query(Item).filter_by(id=item_id, category_id=category_id, expedition_id=expedition_id)
-    user_id = createUser(login_session['email'])
+    deleteItem = session.query(Item).filter_by(id=item_id, category_id=category_id, expedition_id=expedition_id).one()
+    user_id = getUserID(login_session['email'])
     if 'username' not in login_session:
         return redirect('/login')
     if deleteItem.user_id != user_id:
@@ -562,8 +574,8 @@ def deleteItem(expedition_id, category_id, item_id):
         session.delete(deleteItem)
         session.commit()
         flash('You have successfully deleted %s' % deleteItem.name)
-        return redirect('category', expedition_id=expedition_id,
-                        category_id=category_id)
+        return redirect(url_for('category', expedition_id=expedition_id,
+                        category_id=category_id))
     else:
         return render_template('deleteItem.html',
                                expedition_id= expedition_id,
