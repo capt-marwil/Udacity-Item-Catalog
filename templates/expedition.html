@@ -25,6 +25,7 @@
 <div class="row marketing">
     {% if categories.count() != 0 %}
     <div class="col-lg-12">
+        <h3>The following categories for activities have been added so far.</h3>
         {% for c in categories %}
         <h4>
             <a href="{{ url_for('category', expedition_id=expedition.id, category_id=c.id) }}">

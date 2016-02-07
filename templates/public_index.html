@@ -1,34 +1,61 @@
 {% extends "base.html" %}
 {% block title %}Index{% endblock %}
-{%block head %}
-    {{ super() }}
-{% endblock %}
+    {%block head %}
+     {{ super() }}
+    {% endblock %}
 {% block body %}
-      <div class="jumbotron">
-           <p><img src="{{ url_for('static', filename='img/title_index.jpg') }}" class="img-responsive"></p>
-        <h1>EXPAL: Your expedition packing list app</h1>
-        <p class="lead">Ever sat on a mountain in a blizzard and noticed you forgot your tent? Use <em>ExPal</em> to plan your next expedition and organize your stuff. Sign in to create an new expedition or add new categories and items to exisiting expeditions.</p>
+<div class="jumbotron">
+    <p>
+        <img src="{{ url_for('static', filename='img/title_index.jpg') }}"
+             class="img-responsive">
+    </p>
+    <h1>
+        EXPAL: Your expedition packing list app
+    </h1>
+    <p class="lead">
+        Ever sat on a mountain in a blizzard and noticed you forgot your tent?
+        Use <em>ExPal</em> to plan your next expedition and organize
+        your stuff. Use EXPAL helps you to create new expeditions and
+        collaborate on packing lists for all things your
+        planning to do on your adventure.
+    </p>
+    <p>
+        <a class="btn btn-lg btn-success" href="{{ url_for('login') }}"
+           role="button">
+            Sign in
+        </a>
+    </p>
+</div>
+<div class="row marketing">
+    {% if not expeditions %}
         <p>
-            <a class="btn btn-lg btn-success" href="{{ url_for('login') }}" role="button">Sign in</a>
+            So far no expeditions have been registered please
+                <a href="{{ url_for('login') }}">
+                    Login
+                </a> to create a new expedition and start packing!
         </p>
-      </div>
-      <div class="row marketing">
+    {% else %}
+    <div class="col-lg-12">
+        <h3>
+            The following expedition are registered:
+        </h3>
+        {% for e in expeditions %}
 
-          {% if not expeditions %}
-
-          <p>So far no expeditions have been registered please <a href="{{ url_for('login') }}">Login</a> to create a new expedition and start packing!</p>
-           {% else %}
-          <div class="col-lg-12">
-              {% for e in expeditions %}
-
-          <h4><a href="{{ url_for('expedition', expedition_id=e.id) }}">{{ e.title }}</a></h4>
-          <p>{{ e.description|truncate(110, True) }}</p>
-          {% endfor %}
-              {% endif %}
-      </div>
-            <footer class="footer">
-        <p>&copy; 2016 Company, Inc.</p>
-      </footer>
-
-    </div> <!-- /container -->
+        <h4>
+            <a href="{{ url_for('expedition', expedition_id=e.id) }}">
+                {{ e.title }}
+            </a>
+        </h4>
+        <p>
+            {{ e.description|truncate(110, True) }}
+        </p>
+        {% endfor %}
+    {% endif %}
+</div>
+<footer class="footer">
+    <p>
+        &copy; 2016 Company, Inc.
+    </p>
+</footer>
+</div> <!-- /container -->
 {% endblock %}

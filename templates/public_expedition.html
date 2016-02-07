@@ -1,36 +1,57 @@
 {% extends "base.html" %}
 {% block title %}Expedition{% endblock %}
 {%block head %}
-    {{ super() }}
+{{ super() }}
 {% endblock %}
 {% block body %}
-      <div class="jumbotron">
-           <p><img src="{{ expedition.picture }}" class="img-responsive"></p>
-        <h1>{{ expedition.title }}</h1>
-        <p class="lead">{{ expedition.description }}</p>
-          <p>
-            <a class="btn btn-lg btn-success" href="{{ url_for('login') }}" role="button">Sign in</a>
+<div class="jumbotron">
+    <p>
+        <img src="{{ expedition.picture }}" class="img-responsive">
+    </p>
+    <h1>
+        {{ expedition.title }}
+    </h1>
+    <p class="lead">
+        {{ expedition.description }}
+    </p>
+    <p>
+        <a class="btn btn-lg btn-success" href="{{ url_for('login') }}"
+           role="button">
+            Sign in
+        </a>
+    </p>
+</div>
+<div class="row marketing">
+    {% if not categories %}
+        <p>
+            You have to be
+                <a href="{{ url_for('login') }}">
+                    logged in
+                </a>
+            to create a category and start adding stuff!
         </p>
-      </div>
-      <div class="row marketing">
+    {% else %}
+    <div class="col-lg-12">
+        <h1>
+            Categories for this expedition
+        </h1>
+        {% for c in categories %}
+        <h4>
+            <a href="{{ url_for('category', expedition_id=expedition.id,
+            category_id=c.id) }}">
+                {{ c.name }}
+            </a>
+        </h4>
+        <p>
+            {{ c.description|truncate(110, True) }}
+        </p>
+        {% endfor %}
+    {% endif %}
+</div>
 
-          {% if not categories %}
+<footer class="footer">
+<p>&copy; 2016 Company, Inc.</p>
+</footer>
 
-          <p>So far no categories for activities <a href="{{ url_for('login') }}">Login</a> to create a new category and start adding stuff!</p>
-           {% else %}
-          <div class="col-lg-12">
-              <h1>irgendetwas war in categories</h1>
-              {% for c in categories %}
-
-          <h4><a href="{{ url_for('category', expedition_id=expedition.id, category_id=c.id) }}">{{ c.name }}</a></h4>
-          <p>{{ c.description|truncate(110, True) }}</p>
-          {% endfor %}
-              {% endif %}
-      </div>
-
-      <footer class="footer">
-        <p>&copy; 2016 Company, Inc.</p>
-      </footer>
-
-    </div> <!-- /container -->
+</div> <!-- /container -->
 {% endblock %}

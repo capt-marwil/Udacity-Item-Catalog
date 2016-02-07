@@ -43,6 +43,7 @@
     </p>
     {% else %}
     <div class="col-lg-12">
+        <h3>The following items have been added to this category</h3>
         {% for i in items %}
             <h4>
                 <a href="{{ url_for('item', expedition_id=expedition.id, category_id=category.id, item_id=i.id) }}">
