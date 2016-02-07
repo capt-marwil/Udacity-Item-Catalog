@@ -6,7 +6,8 @@ from xml.etree.ElementTree import Element, SubElement
 
 Base = declarative_base()
 
-''' Table declaration '''
+""" Table declaration """
+""" create a many to many relationship between expeditions and categories """
 expeditions_categories = Table('expeditions_categories', Base.metadata,
                                Column('expedition_id', Integer,
                                       ForeignKey('expeditions.id'),
@@ -17,7 +18,9 @@ expeditions_categories = Table('expeditions_categories', Base.metadata,
                                )
 
 
+
 class User(Base):
+    """ stores basic user information """
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     name = Column(String(80), nullable=False)
@@ -26,6 +29,11 @@ class User(Base):
 
 
 class Expedition(Base):
+    """
+    stores information about an expedition
+    uses user_id as a foreign key to keep track of ownership
+    category as a one to many relationship to expedition_categories
+    """
     __tablename__ = 'expeditions'
     id = Column(Integer, primary_key=True)
     title = Column(String(80), nullable=False)
@@ -43,18 +51,14 @@ class Expedition(Base):
             'title': self.title,
             'description': self.description,
         }
-"""
-    @property
-    def serialize_xml(self):
-        root = Element('expedition', id=self.id)
-        title = SubElement(root, 'title')
-        description = SubElement(root, 'description')
-        title.text = self.title
-        description.text = self.description
-        return root
-"""
+
 
 class Category(Base):
+    """
+    stores information about categories/activites
+    uses user_id as a foreign key to keep track of ownership
+    expedition as a one to many relationship to expedition_categories
+    """
     __tablename__ = 'categories'
     id = Column(Integer, primary_key=True)
     name = Column(String(80), nullable=False)
@@ -76,6 +80,10 @@ class Category(Base):
 
 
 class Item(Base):
+    """
+    stores the items associated with an certain category and expedition
+    uses user_id to keep track of ownership
+    """
     __tablename__ = 'items'
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
@@ -98,6 +106,6 @@ class Item(Base):
             'expedition_id': self.expedition_id
         }
 
-
+""" Create the sqllite database """
 engine = create_engine('sqlite:///catalog.db')
 Base.metadata.create_all(engine)
