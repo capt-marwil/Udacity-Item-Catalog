@@ -744,6 +744,35 @@ def getCategoriesXML(expedition_id):
     return app.response_class(tostring(root), mimetype='application/xml')
 
 
+@app.route('/expedition/<int:expedition_id>/category/<int:category_id>/'
+           'item/XML')
+def getItemsXML(expedition_id, category_id):
+    items = session.query(Item).filter_by(
+        expedition_id=expedition_id,
+        category_id=category_id).all()
+    root = Element('allItems')
+    comment = Comment('XML Endpoint Listing '
+                      'all Item for a specific Category and Expedition')
+    root.append(comment)
+    for i in items:
+        ex = SubElement(root, 'expedition')
+        ex.text = i.expedition.title
+        category_name = SubElement(ex, 'category_name')
+        category_description = SubElement(category_name, 'category_description')
+        category_picture = SubElement(category_name, 'category_picture')
+        category_name.text = i.category.name
+        category_description.text = i.category.description
+        category_picture.text = i.category.picture
+        item_name = SubElement(category_name, 'item_name')
+        item_decription = SubElement(item_name, 'item_description')
+        item_picture = SubElement(item_name, 'item_picture')
+        item_name.text = i.name
+        item_decription.text = i.description
+        item_picture.text = i.picture
+    print tostring(root)
+    return app.response_class(tostring(root), mimetype='application/xml')
+
+
 if __name__ == '__main__':
     app.secret_key = 'secret_shmecret'
     app.debug = True
