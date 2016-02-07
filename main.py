@@ -1,5 +1,5 @@
-from flask import Flask, render_template, request, redirect, jsonify, url_for, \
-    flash, make_response
+from flask import Flask, render_template, request, redirect, jsonify, url_for
+from flask import flash, make_response
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask.ext.seasurf import SeaSurf
@@ -20,7 +20,6 @@ csrf = SeaSurf(app)
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
 APPLICATION_NAME = "Expedition Packing list App"
-
 
 
 """ Connect to Database and create a database session """
@@ -70,9 +69,10 @@ def category(expedition_id, category_id):
     category = session.query(Category).filter_by(id=category_id).one()
     items = session.query(Item).filter_by(category_id=category_id,
                                           expedition_id=expedition_id)
-    return render_template('category.html', category=category,
-                                            expedition=expedition,
-                                            items=items)
+    return render_template('category.html',
+                           category=category,
+                           expedition=expedition,
+                           items=items)
 
 
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/'
@@ -98,6 +98,7 @@ def showLogin():
     login_session['state'] = state
     # return "The current session state is %s" % login_session['state']
     return render_template('login.html', STATE=state)
+
 
 @csrf.exempt
 @app.route('/gconnect', methods=['POST'])
@@ -151,8 +152,8 @@ def gconnect():
     stored_access_token = login_session.get('access_token')
     stored_gplus_id = login_session.get('gplus_id')
     if stored_access_token is not None and gplus_id == stored_gplus_id:
-        response = make_response(json.dumps('Current user is already connected.'),
-                                 200)
+        response = make_response(json.dumps(
+            'Current user is already connected.'), 200)
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -178,7 +179,6 @@ def gconnect():
     else:
         createUser(login_session)
 
-
     output = ''
     output += '<h1>Welcome, '
     output += login_session['username']
@@ -186,26 +186,34 @@ def gconnect():
     output += '<img src="'
     output += login_session['picture']
     output += ' " style = ' \
-              '"width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+              '"width: 300px; height: 300px;' \
+              'border-radius: 150px;' \
+              '-webkit-border-radius: 150px;' \
+              '-moz-border-radius: 150px;"> '
     flash("you are now logged in as %s" % login_session['username'])
     print "done!"
     return output
 
-    # DISCONNECT - Revoke a current user's token and reset their login_session
 
 @csrf.exempt
 @app.route('/gdisconnect')
 def gdisconnect():
+    """
+    Revoke the current user's gmail token and reset their login_session
+    :return: /index
+    """
     access_token = login_session['access_token']
     print 'In gdisconnect access token is %s', access_token
     print 'User name is: '
     print login_session['username']
     if access_token is None:
         print 'Access Token is None'
-        response = make_response(json.dumps('Current user not connected.'), 401)
+        response = make_response(json.dumps('Current user not connected.'),
+                                 401)
         response.headers['Content-Type'] = 'application/json'
         return response
-    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
+    url = 'https://accounts.google.com/o/oauth2/revoke?' \
+          'token=%s' % login_session['access_token']
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
     print 'result is '
@@ -216,35 +224,37 @@ def gdisconnect():
         del login_session['username']
         del login_session['email']
         del login_session['picture']
-        # response = make_response(json.dumps('Successfully disconnected.'), 200)
-        # response.headers['Content-Type'] = 'application/json'
         flash('You have successfully been logged out of your Google account.')
         return redirect(url_for('index'))
     else:
-        # response = make_response(json.dumps('Failed to revoke token for given user.', 400))
-        # response.headers['Content-Type'] = 'application/json'
         flash('Failed to revoke token for given user.')
         return redirect(url_for('index'))
+
 
 @csrf.exempt
 @app.route('/fbconnect', methods=['POST'])
 def fbconnect():
+    """
+    Connect with facebook login
+    :return: /index
+    """
     if request.args.get('state') != login_session['state']:
-        response = make_response(json.dumps('Invalid state parameter.'), 401)
+        response = make_response(json.dumps('Invalid state parameter.'),
+                                 401)
         response.headers['Content-Type'] = 'application/json'
         return response
     access_token = request.data
 
+    app_id = json.loads(open(
+        'fb_client_secret.json', 'r').read())['web']['app_id']
+    app_secret = json.loads(open(
+        'fb_client_secret.json', 'r').read())['web']['app_secret']
 
-    app_id = json.loads(open('fb_client_secret.json', 'r').read())['web']['app_id']
-    app_secret = json.loads(open('fb_client_secret.json', 'r').read())['web']['app_secret']
-
-    url = """
-        https://graph.facebook.com/oauth/access_token?
-        grant_type=fb_exchange_token&client_id=%s
-        &client_secret=%s&fb_exchange_token=%s" %
-         (app_id, app_secret, access_token)
-         """
+    url = 'https://graph.facebook.com/oauth/access_token?' \
+          'grant_type=fb_exchange_token&client_id=%s' \
+          '&client_secret=%s&fb_exchange_token=%s' % (app_id,
+                                                      app_secret,
+                                                      access_token)
 
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
@@ -254,26 +264,31 @@ def fbconnect():
     """ strip expire tag from access token """
     token = result.split("&")[0]
 
-
     url = 'https://graph.facebook.com/v2.5/me?%s&fields=name,id,email' % token
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
     # DEBUG output
-    print "url sent for API access: %s" % url
-    print "API JSON result: %s" % result
+    # print "url sent for API access: %s" % url
+    # print "API JSON result: %s" % result
     data = json.loads(result)
     login_session['provider'] = 'facebook'
     login_session['username'] = data["name"]
     login_session['email'] = data["email"]
     login_session['facebook_id'] = data["id"]
 
-    # The token must be stored in the login_session in order to properly logout, let's strip out the information before the equals sign in our token
+    """
+     The token must be stored in the login_session
+     in order to properly logout,
+     let's strip out the information
+     before the equals sign in our token
+    """
     stored_token = token.split("=")[1]
     login_session['access_token'] = stored_token
 
     # get user picture
 
-    url = "https://graph.facebook.com/v2.5/me/picture?%s&redirect=0&height=200&width=200" % token
+    url = 'https://graph.facebook.com/v2.5/me/picture?' \
+          '%s&redirect=0&height=200&width=200' % token
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
     data = json.loads(result)
@@ -292,7 +307,11 @@ def fbconnect():
     output += '!</h1>'
     output += '<img src="'
     output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+    output += ' " style = "width: 300px;' \
+              ' height: 300px;' \
+              'border-radius: 150px;' \
+              '-webkit-border-radius: 150px;' \
+              '-moz-border-radius: 150px;"> '
     flash("you are now logged in as %s" % login_session['username'])
     print "done!"
     return output
@@ -301,9 +320,14 @@ def fbconnect():
 @csrf.exempt
 @app.route('/fbdisconnet')
 def fbdisconnect():
+    """
+    Revoke the current user's facebook token and reset their login_session
+    :return: /index
+    """
     facebook_id = login_session['facebook_id']
     access_token = login_session['access_token']
-    url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (facebook_id, access_token)
+    url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (
+        facebook_id, access_token)
     h = httplib2.Http()
     result = h.request(url, 'DELETE')[1]
     del login_session['username']
@@ -316,21 +340,42 @@ def fbdisconnect():
 
 @app.route('/login')
 def login():
+    """
+    Helper function to render the login Template that redirects to index
+    page
+    :return: login.html
+    """
     return render_template('login.html')
 
 
 @app.route('/disconnet')
 def disconnet():
+    """
+    Helper function that checks for the session provider and redirects
+    accordingly
+    :return: /fbdisconnect or /gdisconnet
+    """
     if login_session['provider'] == 'facebook':
         return redirect(url_for('fbdisconnect'))
     if login_session['provider'] == 'google':
         return redirect(url_for('gdisconnect'))
 
-""" routes to add, edit and delete database entities require a valid login """
+"""
+    The following routs require a valid login
+    Users can add, edit and delete database entities
+"""
 
 """ routes to manipulate Expdition entity """
+
+
 @app.route('/expedition/new', methods=['GET', 'POST'])
 def addExpedition():
+    """
+    Checks whether user is logged in
+    GET returns form to add an new expedition
+    POST saves new expedition and returns start page with expeditions overview
+    :return: /login or /expedition or /addExpedition
+    """
     if 'username' not in login_session:
         return redirect('/login')
     if request.method == 'POST':
@@ -352,19 +397,22 @@ def addExpedition():
 def editExpedition(expedition_id):
     """
     Checks whether user is logged in
-    If called with GET displays form to edit an expedition record
-    If called with POST checks whether user is logged in and allowed to edit
-     the record.
-    If so stores edited data and redirects user to expedition overview
+    GET displays form to edit an expedition record
+    POST stores edited data and returns start page with expedition overview
     :param expedition_id:
-    :return: editExpedition.html or expedition.html
+    :return: /login, /editExpedition or /expedition
     """
-    editedExpediton = session.query(Expedition).filter_by(id=expedition_id).one()
+    editedExpediton = session.query(Expedition).filter_by(
+        id=expedition_id).one()
     user_id = getUserID(login_session['email'])
     if 'username' not in login_session:
         return redirect('/login')
     if editedExpediton.user_id != user_id:
-        return "You are not allowed to edit this expedition. Only Users how created an expedition are allowed to edit the informaiton."
+        flash('You are not allowed to edit this expedition. '
+              'Only Users who created an expedition are allowed '
+              'to edit the information.')
+        return redirect(url_for('expedition',
+                                expedition_id=expedition_id))
     if request.method == 'POST':
         if request.form['title']:
             editedExpediton.title = request.form['title']
@@ -382,23 +430,26 @@ def editExpedition(expedition_id):
                                expedition=editedExpediton)
 
 
-
 @app.route('/expedition/<int:expedition_id>/'
            'delete', methods=['GET', 'POST'])
 def deleteExpedition(expedition_id):
     """
     checks whether user is logged in
-    If called with GET displays form to delete an expedition record
-    If called with POST deletes the record.
+    GET displays form to delete an expedition record
+    POST deletes the record and redirects to index
     :param expedition_id:
-    :return: deleteExpedition.html or expedition.html
+    :return: /deleteExpedition or /index
     """
-    deleteExpedition = session.query(Expedition).filter_by(id=expedition_id).one()
+    deleteExpedition = session.query(Expedition).filter_by(
+        id=expedition_id).one()
     user_id = getUserID(login_session['email'])
     if 'username' not in login_session:
         return redirect('/login')
     if deleteExpedition.user_id != user_id:
-        return "You are not allowed to delete this expedition. Users can only delete Expeditions they created"
+        flash('You are not allowed to delete this expedition.'
+              ' Users can only delete Expeditions they created')
+        return redirect(url_for('expedition',
+                                expedition_id=expedition_id))
     if request.method == 'POST':
         session.delete(deleteExpedition)
         session.commit()
@@ -417,10 +468,10 @@ def deleteExpedition(expedition_id):
 def addCategory(expedition_id):
     """
     checks whether user is logged in
-    If called with GET displays form to add a category
-    If called with POST adds the record.
+    GET displays form to add a category
+    POST saves new category and return expediton overview with categories
     :param expedition_id:
-    :return: addCategory.html, expedition, login
+    :return: /addCategory or /expedition or /login
     """
     expedition = session.query(Expedition).filter_by(id=expedition_id).one()
     user_id = getUserID(login_session['email'])
@@ -432,7 +483,6 @@ def addCategory(expedition_id):
                                picture=request.form['picture'],
                                user_id=user_id)
         expedition.category.append(newCategory)
-        #newCategory.expedition.append(expedition)
         session.add(newCategory)
         session.commit()
         items = session.query(Item).filter_by(id=newCategory.id).all()
@@ -445,24 +495,29 @@ def addCategory(expedition_id):
         return render_template('addCategory.html',
                                expedition=expedition)
 
-#/expedition/3/category/4/edit
+
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/edit',
            methods=['GET', 'POST'])
 def editCategory(expedition_id, category_id):
     """
     checks whether user is logged in
-    If called with GET displays form to edit a category
-    If called with POST saves the record.
+    GET displays form to edit a category
+    POST saves edited data and redirects user to expedition overview
     :param expedition_id:
     :param category_id:
-    :return: editCategory.html, category.html, login.html
+    :return: /editCategory, /category, /login
     """
-    editCategory = session.query(Category).filter_by(id=category_id).filter(Category.expedition.any(id=expedition_id)).first()
+    editCategory = session.query(Category).filter_by(id=category_id).filter(
+        Category.expedition.any(id=expedition_id)).first()
     user_id = getUserID(login_session['email'])
     if 'username' not in login_session:
         return redirect('/login')
     if editCategory.user_id != user_id:
-        return "Your are not allowed to edit this category. Users are only allowed to edit their own categories."
+        flash('You are not allowed to edit this category. '
+              'Users are only allowed to edit categories they created.')
+        return redirect(url_for('category',
+                                expedition_id=expedition_id,
+                                category_id=category_id))
     if request.method == 'POST':
         if request.form['name']:
             editCategory.name = request.form['name']
@@ -485,12 +540,18 @@ def editCategory(expedition_id, category_id):
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/'
            'delete', methods=['GET', 'POST'])
 def deleteCategory(expedition_id, category_id):
-    deleteCategory = session.query(Category).filter_by(id=category_id).filter(Category.expedition.any(id=expedition_id)).first()
+    deleteCategory = session.query(Category).filter_by(
+        id=category_id).filter(
+        Category.expedition.any(id=expedition_id)).first()
     user_id = getUserID(login_session['email'])
     if 'username' not in login_session:
         return redirect('/login')
     if deleteCategory.user_id != user_id:
-        return "You are not allowed to deleted this category. Users are only allowed to delete categories they created."
+        flash('You are not allowed to deleted this category. '
+              'Users are only allowed to delete categories they created.')
+        return redirect(url_for('category',
+                                expedition_id=expedition_id,
+                                category_id=category_id))
     if request.method == 'POST':
         session.delete(deleteCategory)
         session.commit()
@@ -499,8 +560,8 @@ def deleteCategory(expedition_id, category_id):
                                 expedition_id=expedition_id))
     else:
         return render_template('deleteCategory.html',
-                        expedition_id=expedition_id,
-                        category=deleteCategory)
+                               expedition_id=expedition_id,
+                               category=deleteCategory)
 
 
 """ routes to manipulate Item entity """
@@ -528,19 +589,26 @@ def addItem(expedition_id, category_id):
                         category_id=category_id))
 
     else:
-        return render_template('addItem.html', expedition_id=expedition_id, category_id=category_id)
-
+        return render_template('addItem.html',
+                               expedition_id=expedition_id,
+                               category_id=category_id)
 
 
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/item/'
            '<int:item_id>/edit', methods=['GET', 'POST'])
 def editItem(expedition_id, category_id, item_id):
-    editItem = session.query(Item).filter_by(id=item_id, category_id=category_id, expedition_id=expedition_id)
+    editItem = session.query(Item).filter_by(id=item_id,
+                                             category_id=category_id,
+                                             expedition_id=expedition_id)
     user_id = getUserID(login_session['email'])
     if 'username' not in login_session:
         return redirect('/login')
     if editItem.user_id != user_id:
-        return "Your are not allowed to edit this item. Users are only allowed to edit Items they created."
+        flash('Your are not allowed to edit this item.'
+              ' Users are only allowed to edit Items they created.')
+        return redirect(url_for('category',
+                                expedition_id=expedition_id,
+                                category_id=category_id))
     if request.method == 'POST':
         if request.form['name']:
             editItem.name = request.form['name']
@@ -564,26 +632,34 @@ def editItem(expedition_id, category_id, item_id):
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/item/'
            '<int:item_id>/delete/', methods=['GET', 'POST'])
 def deleteItem(expedition_id, category_id, item_id):
-    deleteItem = session.query(Item).filter_by(id=item_id, category_id=category_id, expedition_id=expedition_id).one()
+    delItem = session.query(Item).filter_by(id=item_id,
+                                            category_id=category_id,
+                                            expedition_id=expedition_id).one()
     user_id = getUserID(login_session['email'])
     if 'username' not in login_session:
         return redirect('/login')
-    if deleteItem.user_id != user_id:
-        return "You are not allowed to delete this item. Users are only allowed to delete items they created."
+    if delItem.user_id != user_id:
+        flash('Your are not allowed to delete this item.'
+              ' Users are only allowed to delete items they created.')
+        return redirect(url_for('category',
+                                expedition_id=expedition_id,
+                                category_id=category_id))
     if request.method == 'POST':
-        session.delete(deleteItem)
+        session.delete(delItem)
         session.commit()
-        flash('You have successfully deleted %s' % deleteItem.name)
+        flash('You have successfully deleted %s' % delItem.name)
         return redirect(url_for('category', expedition_id=expedition_id,
                         category_id=category_id))
     else:
         return render_template('deleteItem.html',
-                               expedition_id= expedition_id,
+                               expedition_id=expedition_id,
                                category_id=category_id,
-                               item=deleteItem)
+                               item=delItem)
 
 
 """ Create and edit Users in the database """
+
+
 def getUserID(email):
     try:
         user = session.query(User).filter_by(email=email).one()
@@ -603,10 +679,11 @@ def createUser(login_session):
                    picture=login_session['picture'])
     session.add(NewUser)
     session.commit()
-    user = session.query(User).filter_by(email = login_session['email']).one()
+    user = session.query(User).filter_by(email=login_session['email']).one()
     return user.id
 
 """ routes to return data via json or xml apis """
+
 
 @app.route('/expedition/JSON')
 def getExpeditionJSON():
@@ -616,15 +693,17 @@ def getExpeditionJSON():
 
 @app.route('/expedition/<int:expedition_id>/JSON')
 def getCategoriesJSON(expedition_id):
-    categories = session.query(Category).filter(Category.expedition.any(id=expedition_id)).all()
+    categories = session.query(Category).filter(
+        Category.expedition.any(id=expedition_id)).all()
     return jsonify(categories=[c.serialize_json for c in categories])
 
 
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/JSON')
 def getItemsJSON(expedition_id, category_id):
-    items = session.query(Item).filter_by(category_id=category_id, expedition_id=expedition_id)
-    return jsonify(items=[i.serialize_json for c in items])
-
+    items = session.query(Item).filter_by(
+        category_id=category_id,
+        expedition_id=expedition_id)
+    return jsonify(items=[i.serialize_json for i in items])
 
 
 @app.route('/expedition/XML')
@@ -646,9 +725,11 @@ def getExpeditionsXML():
 @app.route('/expedition/<int:expedition_id>/category/XML')
 def getCategoriesXML(expedition_id):
     expedition = session.query(Expedition).filter_by(id=expedition_id).first()
-    categories = session.query(Category).filter(Category.expedition.any(id=expedition_id)).all()
+    categories = session.query(Category).filter(
+        Category.expedition.any(id=expedition_id)).all()
     root = Element('allCategories')
-    comment = Comment('XML Endpoint Listing all Categories for a specific Expedition')
+    comment = Comment('XML Endpoint Listing '
+                      'all Categories for a specific Expedition')
     root.append(comment)
     ex = SubElement(root, 'expedition')
     ex.text = expedition.title
