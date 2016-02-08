@@ -70,7 +70,7 @@ project
 |-fb_client_secrets.json
 |-main.py
 |-README.md
-|-setupdatabase.py``
+|-setupdatabase.py
 
 
 ##Installation##
