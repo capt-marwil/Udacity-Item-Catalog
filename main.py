@@ -96,7 +96,7 @@ def category(expedition_id, category_id):
     category = session.query(Category).filter_by(id=category_id).one()
     items = session.query(Item).filter_by(category_id=category_id,
                                           expedition_id=expedition_id)
-    if 'user_name' not in login_session:
+    if 'username' not in login_session:
         flash('Please login to view the categories for this expedition')
         return redirect(url_for('index'))
     else:
@@ -120,7 +120,7 @@ def item(expedition_id, category_id, item_id):
     item = session.query(Item).filter_by(id=item_id,
                                          category_id=category_id,
                                          expedition_id=expedition_id).one()
-    if 'user_name' not in login_session:
+    if 'username' not in login_session:
         flash('Please login to view the items associated with this category')
         return redirect(url_for('index'))
     else:
@@ -438,6 +438,11 @@ def addExpedition():
                                    description=request.form['description'],
                                    picture=request.form['picture'],
                                    user_id=user_id)
+        # check for duplicate expedition title
+        if check_expedition_name(newExpedition.title):
+            flash('The expeditions title is already in use.'
+                  'Please choose another name.')
+            return redirect(url_for('addExpedition'))
         session.add(newExpedition)
         flash('New Expedition %s has been created' % newExpedition.title)
         session.commit()
@@ -468,6 +473,12 @@ def editExpedition(expedition_id):
         return redirect(url_for('expedition',
                                 expedition_id=expedition_id))
     if request.method == 'POST':
+        # check for duplicate expedition title
+        if check_expedition_name(request.form['title']):
+            flash('The expeditions title is already in use.'
+                  'Please choose another name.')
+            return redirect(url_for('editExpedition',
+                                    expedition_id=expedition_id))
         if request.form['title']:
             editedExpediton.title = request.form['title']
         if request.form['description']:
@@ -531,7 +542,13 @@ def addCategory(expedition_id):
     user_id = getUserID(login_session['email'])
     if 'username' not in login_session:
         return redirect('/login')
+    # Check for duplicate category name
     if request.method == 'POST':
+        if check_category_name(request.form['name'], expedition_id):
+            flash("%s is already in use in this expedition."
+                  " Please choose another name." % request.form['name'])
+            return redirect(url_for('addCategory',
+                                    expedition_id=expedition_id))
         newCategory = Category(name=request.form['name'],
                                description=request.form['description'],
                                picture=request.form['picture'],
@@ -573,6 +590,12 @@ def editCategory(expedition_id, category_id):
                                 expedition_id=expedition_id,
                                 category_id=category_id))
     if request.method == 'POST':
+        if check_category_name(request.form['name'],
+                               expedition_id=expedition_id):
+            flash("%s is already in use in this expedition."
+                  " Please choose another name." % request.form['name'])
+            return redirect(url_for('editCategory',
+                                    expedition_id=expedition_id))
         if request.form['name']:
             editCategory.name = request.form['name']
         if request.form['description']:
@@ -652,6 +675,14 @@ def addItem(expedition_id, category_id):
                     description=request.form['description'],
                     picture=request.form['picture']
                     )
+        # check for duplicate item name in this category
+        if check_item_name(
+                request.form['name'], expedition_id, category_id):
+            flash("%s has already been added to this category."
+                  "Please choose another item." % request.form['name'])
+            return redirect(url_for('addItem',
+                                    expedition_id=expedition_id,
+                                    category_id=category_id))
         session.add(newItem)
         session.commit()
         return redirect(url_for('category',
@@ -677,7 +708,7 @@ def editItem(expedition_id, category_id, item_id):
     """
     editItem = session.query(Item).filter_by(id=item_id,
                                              category_id=category_id,
-                                             expedition_id=expedition_id)
+                                             expedition_id=expedition_id).one()
     user_id = getUserID(login_session['email'])
     if 'username' not in login_session:
         return redirect('/login')
@@ -688,9 +719,18 @@ def editItem(expedition_id, category_id, item_id):
                                 expedition_id=expedition_id,
                                 category_id=category_id))
     if request.method == 'POST':
+        # check for duplicate item name in this category
+        if check_item_name(
+                request.form['name'], expedition_id, category_id):
+            flash("%s has already been added to this category."
+                  "Please choose another item." % request.form['name'])
+            return render_template('editItem.html',
+                               expedition_id=expedition_id,
+                               category_id=category_id,
+                               item=editItem)
         if request.form['name']:
             editItem.name = request.form['name']
-        if request.form['descripttion']:
+        if request.form['description']:
             editItem.description = request.form['description']
         if request.form['picture']:
             editItem.picture = request.form['picture']
@@ -887,7 +927,8 @@ def getItemsXML(expedition_id, category_id):
         ex = SubElement(root, 'expedition')
         ex.text = i.expedition.title
         category_name = SubElement(ex, 'category_name')
-        category_description = SubElement(category_name, 'category_description')
+        category_description = SubElement(category_name,
+                                          'category_description')
         category_picture = SubElement(category_name, 'category_picture')
         category_name.text = i.category.name
         category_description.text = i.category.description
@@ -900,6 +941,63 @@ def getItemsXML(expedition_id, category_id):
         item_picture.text = i.picture
     print tostring(root)
     return app.response_class(tostring(root), mimetype='application/xml')
+
+
+def check_expedition_name(title):
+    """
+    checks whether an expedition is already present
+    :param title:
+    :return: Boolean
+    """
+    expeditions = session.query(Expedition).all()
+    for e in expeditions:
+        if e.title == title:
+            return True
+        else:
+            return False
+
+
+def check_category_name(name, expedition_id):
+    """
+    checks whether a category name is already present for
+    a given expedition
+    :param name:
+    :param expedition_id:
+    :return: boolean
+    """
+    categories = session.query(Category).filter(
+        Category.expedition.any(id=expedition_id)).all()
+    for c in categories:
+        if c.name == name:
+            return True
+        else:
+            return False
+
+
+def check_item_name(name, expedition_id, category_id):
+    """
+    checks whether an item name is already present for
+    a given expedition and category
+    :param name:
+    :param expedition_id:
+    :param category_id:
+    :return: boolean
+    """
+    items = session.query(Item).filter_by(
+        expedition_id=expedition_id,
+        category_id=category_id).all()
+    for i in items:
+        if i.name == name:
+            return True
+        else:
+            return False
+
+
+"""
+    starting the application
+    in a production environment the secret_key should be
+    set to a proper value and debug set to false
+"""
 
 
 if __name__ == '__main__':
