@@ -27,52 +27,6 @@ to run this project requires python 2.7.x
 * bootstrap 3.x
 * jquery- 2.x
 
-##Project Structure##
-``
-project
-|
-|---static
-|   |
-|   |-bootstrap.css
-|   |-bootstrap.js
-|   |-bootstrap.min.css
-|   |-bootstrap.min.js
-|   |-bootstrap-theme.css
-|   |-bootstrap-theme.min.css
-|   |-ie10-viewport-bug-workaround.css
-|   |-ie10-viewport-bug-workaround.js
-|   |-jquey-2.2.0.min.js
-|   |-jumbotron-narrow.css
-|   |-img
-|       |-title_index.jpg
-|
-|---templates
-|       |
-|       |-addCategory.html
-|       |-addExpedition.html
-|       |-addItem.html
-|       |-base.html
-|       |-category.html
-|       |-deleteCategory.html
-|       |-deleteExpedition.html
-|       |-deleteItem.html
-|       |-editCategory.html
-|       |-editExpedition.html
-|       |-editItem.html
-|       |-expedition.html
-|       |-index.html
-|       |-item.html
-|       |-login.html
-|       |-public_expedition.html
-|       |-public_index.html
-|
-|-client_secrets.json
-|-fb_client_secrets.json
-|-main.py
-|-README.md
-|-setupdatabase.py
-´´´
-
 ##Installation##
 * Download the zip File and unpack it into a directory using your favorite 
 unzipper e.g. `unzip project.zip` 
@@ -128,3 +82,49 @@ has been logged in for a longer time > 30 min and didn't interact with the app.
 Only solution I could find was to delete cookies and reload the app. From the
 information I gathered it seems to be the case that the session runs out and I
 didn't find a way to keep it alive, without user interaction.
+
+##Project Structure##
+```
+project
+|
+|---static
+|   |
+|   |-bootstrap.css
+|   |-bootstrap.js
+|   |-bootstrap.min.css
+|   |-bootstrap.min.js
+|   |-bootstrap-theme.css
+|   |-bootstrap-theme.min.css
+|   |-ie10-viewport-bug-workaround.css
+|   |-ie10-viewport-bug-workaround.js
+|   |-jquey-2.2.0.min.js
+|   |-jumbotron-narrow.css
+|   |-img
+|       |-title_index.jpg
+|
+|---templates
+|       |
+|       |-addCategory.html
+|       |-addExpedition.html
+|       |-addItem.html
+|       |-base.html
+|       |-category.html
+|       |-deleteCategory.html
+|       |-deleteExpedition.html
+|       |-deleteItem.html
+|       |-editCategory.html
+|       |-editExpedition.html
+|       |-editItem.html
+|       |-expedition.html
+|       |-index.html
+|       |-item.html
+|       |-login.html
+|       |-public_expedition.html
+|       |-public_index.html
+|
+|-client_secrets.json
+|-fb_client_secrets.json
+|-main.py
+|-README.md
+|-setupdatabase.py
+```
