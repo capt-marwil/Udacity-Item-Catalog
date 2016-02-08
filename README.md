@@ -28,7 +28,7 @@ to run this project requires python 2.7.x
 * jquery- 2.x
 
 ##Project Structure##
-``
+```
 project
 |
 |---static
@@ -70,8 +70,8 @@ project
 |-fb_client_secrets.json
 |-main.py
 |-README.md
-|-setupdatabase.py
-```
+|-setupdatabase.py``
+
 
 ##Installation##
 * Download the zip File and unpack it into a directory using your favorite 
