@@ -16,6 +16,12 @@ from xml.etree.ElementTree import Element, SubElement, Comment, tostring
 
 
 app = Flask(__name__)
+
+"""
+passing the applicatiton to the Sea Surf extension
+to prevent csrf Attacks
+"""
+
 csrf = SeaSurf(app)
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
@@ -38,6 +44,12 @@ session = DBSession()
 @app.route('/')
 @app.route('/catalog')
 def index():
+    """
+    Starting page of the application
+    Checks whether user is already logged in
+    Displays either a "public" page or a page where users
+    can edit and add expeditons
+    """
     expeditions = session.query(Expedition).order_by(Expedition.title)
     if 'username' not in login_session:
         return render_template('public_index.html',
@@ -49,6 +61,14 @@ def index():
 
 @app.route('/expedition/<int:expedition_id>')
 def expedition(expedition_id):
+    """
+    Checks whether user is logged in
+    shows start page of an expedition with links to edit or delete the
+    expedition
+    otherwise shows "public" page of an expedition
+    :param expedition_id:
+    :return:
+    """
     expedition = session.query(Expedition).filter_by(id=expedition_id).one()
     categories = session.query(Category).filter(Category.expedition.any(
         id=expedition_id))
@@ -65,26 +85,49 @@ def expedition(expedition_id):
 
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>')
 def category(expedition_id, category_id):
+    """
+    Checks whether user is logged in
+    if so shows a list of categories associated with an expedition
+    otherwise redirects user to startpage
+    :param expedition_id:
+    :param category_id:
+    """
     expedition = session.query(Expedition).filter_by(id=expedition_id).one()
     category = session.query(Category).filter_by(id=category_id).one()
     items = session.query(Item).filter_by(category_id=category_id,
                                           expedition_id=expedition_id)
-    return render_template('category.html',
-                           category=category,
-                           expedition=expedition,
-                           items=items)
+    if 'user_name' not in login_session:
+        flash('Please login to view the categories for this expedition')
+        return redirect(url_for('index'))
+    else:
+        return render_template('category.html',
+                               category=category,
+                               expedition=expedition,
+                               items=items)
 
 
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/'
            'item/<int:item_id>')
 def item(expedition_id, category_id, item_id):
+    """
+    Checks whether user is logged in
+    if so shows an items associated with a category and expedition
+    otherwise redirects user to startpage
+    :param expedition_id:
+    :param category_id:
+    :param item_id:
+    """
     item = session.query(Item).filter_by(id=item_id,
                                          category_id=category_id,
                                          expedition_id=expedition_id).one()
-    return render_template('item.html',
-                           expedition_id=expedition_id,
-                           category_id=category_id,
-                           item=item)
+    if 'user_name' not in login_session:
+        flash('Please login to view the items associated with this category')
+        return redirect(url_for('index'))
+    else:
+        return render_template('item.html',
+                               expedition_id=expedition_id,
+                               category_id=category_id,
+                               item=item)
 
 
 """ routes to login and to logout """
@@ -93,6 +136,11 @@ def item(expedition_id, category_id, item_id):
 # Create anti-forgery state token
 @app.route('/login')
 def showLogin():
+    """
+    Helper function that generates an state variable and displays the
+    login Screen
+    :return:
+    """
     state = ''.join(random.choice(string.ascii_uppercase + string.digits)
                     for x in xrange(32))
     login_session['state'] = state
@@ -103,6 +151,12 @@ def showLogin():
 @csrf.exempt
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
+    """
+    Based on the credentials provided, connects user with
+    google account and creates a local user account
+    :return:
+    """
+
     # Validate state token
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
@@ -200,7 +254,7 @@ def gconnect():
 def gdisconnect():
     """
     Revoke the current user's gmail token and reset their login_session
-    :return: /index
+    :return: index
     """
     access_token = login_session['access_token']
     print 'In gdisconnect access token is %s', access_token
@@ -236,7 +290,7 @@ def gdisconnect():
 def fbconnect():
     """
     Connect with facebook login
-    :return: /index
+    :return: index
     """
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'),
@@ -322,7 +376,7 @@ def fbconnect():
 def fbdisconnect():
     """
     Revoke the current user's facebook token and reset their login_session
-    :return: /index
+    :return: index
     """
     facebook_id = login_session['facebook_id']
     access_token = login_session['access_token']
@@ -361,7 +415,7 @@ def disconnet():
         return redirect(url_for('gdisconnect'))
 
 """
-    The following routs require a valid login
+    The following routes require a valid login
     Users can add, edit and delete database entities
 """
 
@@ -540,6 +594,14 @@ def editCategory(expedition_id, category_id):
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/'
            'delete', methods=['GET', 'POST'])
 def deleteCategory(expedition_id, category_id):
+    """
+    checks whether user is logged in
+    GET displays form to delete the category
+    POST deletes the category and redirects user to expedition overview
+    :param expedition_id:
+    :param category_id:
+    :return: login or expedition or deleteCategory
+    """
     deleteCategory = session.query(Category).filter_by(
         id=category_id).filter(
         Category.expedition.any(id=expedition_id)).first()
@@ -570,6 +632,14 @@ def deleteCategory(expedition_id, category_id):
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/item/'
            'new/', methods=['GET', 'POST'])
 def addItem(expedition_id, category_id):
+    """
+    checks whether user is logged in
+    GET displays form to add an item to a category
+    POST saves new item and redirects to overview
+    :param expedition_id:
+    :param category_id:
+    :return: login or category or addItem
+    """
     if 'username' not in login_session:
         return redirect('/login')
     if request.method == 'POST':
@@ -597,6 +667,14 @@ def addItem(expedition_id, category_id):
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/item/'
            '<int:item_id>/edit', methods=['GET', 'POST'])
 def editItem(expedition_id, category_id, item_id):
+    """
+    checks whether user is logged in
+    GET displays form to edit an item to a category
+    POST saves edited item and redirects to overview
+    :param expedition_id:
+    :param category_id:
+    :return: login or category or editItem
+    """
     editItem = session.query(Item).filter_by(id=item_id,
                                              category_id=category_id,
                                              expedition_id=expedition_id)
@@ -632,6 +710,14 @@ def editItem(expedition_id, category_id, item_id):
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/item/'
            '<int:item_id>/delete/', methods=['GET', 'POST'])
 def deleteItem(expedition_id, category_id, item_id):
+    """
+    checks whether user is logged in
+    GET displays form to delete an item from a category
+    POST deletes item and redirects to overview
+    :param expedition_id:
+    :param category_id:
+    :return: login or category or deleteItem
+    """
     delItem = session.query(Item).filter_by(id=item_id,
                                             category_id=category_id,
                                             expedition_id=expedition_id).one()
@@ -657,10 +743,15 @@ def deleteItem(expedition_id, category_id, item_id):
                                item=delItem)
 
 
-""" Create and edit Users in the database """
+""" Helper functions to create and edit Users in the database """
 
 
 def getUserID(email):
+    """
+    Get user ID based on the email address stored in login_session
+    :param email
+    :return user.id or None
+    """
     try:
         user = session.query(User).filter_by(email=email).one()
         return user.id
@@ -669,11 +760,21 @@ def getUserID(email):
 
 
 def getUserInfo(user_id):
+    """
+    Get User Data based on the users ID
+    :param user_id
+    :return user session Query Object
+    """
     user = session.query(User).filter_by(id=user_id).one()
     return user
 
 
 def createUser(login_session):
+    """
+    Create a local user account
+    :param login_session:
+    :return: user.id
+    """
     NewUser = User(name=login_session['username'],
                    email=login_session['email'],
                    picture=login_session['picture'])
@@ -687,12 +788,20 @@ def createUser(login_session):
 
 @app.route('/expedition/JSON')
 def getExpeditionJSON():
+    """
+    Endpoint to return a JSON List of all expeditions
+    """
     expeditions = session.query(Expedition).all()
     return jsonify(expeditions=[e.serialize_json for e in expeditions])
 
 
 @app.route('/expedition/<int:expedition_id>/JSON')
 def getCategoriesJSON(expedition_id):
+    """
+    Endpoint to return a JSON List of all categories associated
+    with a certain expedition
+    :param expedition_id:
+    """
     categories = session.query(Category).filter(
         Category.expedition.any(id=expedition_id)).all()
     return jsonify(categories=[c.serialize_json for c in categories])
@@ -700,6 +809,12 @@ def getCategoriesJSON(expedition_id):
 
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/JSON')
 def getItemsJSON(expedition_id, category_id):
+    """
+    Endpoint to return a JSON List of all items associated
+    with a certain expedition and category
+    :param expedition_id:
+    :param category_id:
+    """
     items = session.query(Item).filter_by(
         category_id=category_id,
         expedition_id=expedition_id)
@@ -708,6 +823,9 @@ def getItemsJSON(expedition_id, category_id):
 
 @app.route('/expedition/XML')
 def getExpeditionsXML():
+    """
+    Endpoint to return an XML List of all expeditions
+    """
     expeditions = session.query(Expedition).all()
     root = Element('AllExpeditions')
     comment = Comment('XML Endpoint Listing all Expeditions currently listed')
@@ -724,6 +842,11 @@ def getExpeditionsXML():
 
 @app.route('/expedition/<int:expedition_id>/category/XML')
 def getCategoriesXML(expedition_id):
+    """
+    Endpoint to return an XML List of all categories associated
+    with a certain expedition
+    :param expedition_id:
+    """
     expedition = session.query(Expedition).filter_by(id=expedition_id).first()
     categories = session.query(Category).filter(
         Category.expedition.any(id=expedition_id)).all()
@@ -747,6 +870,12 @@ def getCategoriesXML(expedition_id):
 @app.route('/expedition/<int:expedition_id>/category/<int:category_id>/'
            'item/XML')
 def getItemsXML(expedition_id, category_id):
+    """
+    Endpoint to return an XML List of all items associated
+    with a certain expedition and category
+    :param expedition_id:
+    :param category_id:
+    """
     items = session.query(Item).filter_by(
         expedition_id=expedition_id,
         category_id=category_id).all()
