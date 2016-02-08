@@ -28,6 +28,7 @@ to run this project requires python 2.7.x
 * jquery- 2.x
 
 ##Project Structure##
+``
 project
 |
 |---static
@@ -70,7 +71,7 @@ project
 |-main.py
 |-README.md
 |-setupdatabase.py
-
+```
 
 ##Installation##
 * Download the zip File and unpack it into a directory using your favorite 
@@ -79,6 +80,13 @@ unzipper e.g. `unzip project.zip`
  by typing `git clone https://github.com/capt-marwil/project/`
 * To set up the database run setup_database.py. This will create an empty sqlite
 file in the /project named catalog.db
+* Currently main.py is configured to run with a vm container like vagrant
+* If you plan to run the app on your physical computer it might be nessecary
+to change the servers address in main.py
+* on the command line change into the `project` directory and type `python main.py`
+on the command prompt. If any python modules are missed the program will complain 
+and tell what modules are missing. The links to the instructions how to install
+the missing modules are included above.
 * To start creating an expedition and to add categories an items go to 
 http://localhost:8080/ 
 * Navigate to http://localhost:808/ to login and login-in 
